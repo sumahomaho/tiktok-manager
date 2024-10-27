@@ -7,7 +7,82 @@ import { Trash2, Clock, Gift, UserPlus, Settings, X, Plus, Edit2 } from 'lucide-
 const ITEMS = ['🥊', '☁️', '⏰️', '⚒️'];
 
 const ContributorManager = ({ isOpen, onClose, contributors, setContributors }) => {
-  // ContributorManagerの内容は変更なし
+  const [newContributor, setNewContributor] = useState('');
+  const [editingContributor, setEditingContributor] = useState({ index: -1, name: '' });
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">アイテム取得者の管理</h2>
+          <button 
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="mb-4 flex">
+          <input
+            type="text"
+            value={newContributor}
+            onChange={(e) => setNewContributor(e.target.value)}
+            placeholder="新規取得者名"
+            className="flex-1 p-2 border rounded mr-2 text-gray-800"
+          />
+          <button
+            onClick={handleAdd}
+            className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            追加
+          </button>
+        </div>
+
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {contributors.map((contributor, index) => (
+            <div key={index} className="flex items-center gap-2 p-2 border rounded">
+              {editingContributor.index === index ? (
+                <>
+                  <input
+                    type="text"
+                    value={editingContributor.name}
+                    onChange={(e) => setEditingContributor({ ...editingContributor, name: e.target.value })}
+                    className="flex-1 p-2 border rounded text-gray-800"
+                  />
+                  <button
+                    onClick={handleEdit}
+                    className="text-green-500 hover:text-green-600"
+                  >
+                    保存
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="flex-1 text-gray-800">{contributor}</span>
+                  <button
+                    onClick={() => startEditing(index, contributor)}
+                    className="text-blue-500 hover:text-blue-600"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(index)}
+                    className="text-red-500 hover:text-red-600"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const TikTokItemManager = () => {
@@ -110,7 +185,7 @@ const TikTokItemManager = () => {
 
   return (
     <div className="p-4 space-y-4 bg-white min-h-screen">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
         <h1 className="text-2xl font-bold text-gray-800">TikTok ライブバトルアイテム管理</h1>
         <div className="flex gap-2">
           <button 
@@ -129,78 +204,81 @@ const TikTokItemManager = () => {
           </button>
         </div>
       </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left border-b text-gray-800">アイテム取得者</th>
-              <th className="px-4 py-2 text-left border-b text-gray-800">獲得アイテム</th>
-              <th className="px-4 py-2 text-left border-b text-gray-800">残り時間</th>
-              <th className="px-4 py-2 text-left border-b text-gray-800">使用期限</th>
-              <th className="px-4 py-2 text-left border-b text-gray-800">取得日時</th>
-              <th className="px-4 py-2 text-left border-b text-gray-800">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(item => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border-b text-gray-800">
-                  <select
-                    value={item.contributor}
-                    onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
-                    className="w-32 p-2 border rounded bg-white text-gray-800"
-                  >
-                    {contributors.map(contributor => (
-                      <option key={contributor} value={contributor}>
-                        {contributor}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-2 border-b text-gray-800">
-                  <select
-                    value={item.item}
-                    onChange={(e) => updateItem(item.id, 'item', e.target.value)}
-                    className="w-20 p-2 border rounded bg-white text-gray-800"
-                  >
-                    {ITEMS.map(itemOption => (
-                      <option key={itemOption} value={itemOption}>
-                        {itemOption}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-2 border-b text-gray-800">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    {getRemainingTime(item.expiryTime)}
-                  </div>
-                </td>
-                <td className="px-4 py-2 border-b text-gray-800">{formatDateTime(item.expiryTime)}</td>
-                <td className="px-4 py-2 border-b text-gray-800">
-                  <input
-                    type="datetime-local"
-                    value={item.acquisitionTime.slice(0, 16)}
-                    onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-                    className="p-2 border rounded bg-white text-gray-800"
-                  />
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <button
-                    onClick={() => deleteItem(item.id)}
-                    className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    削除
-                  </button>
-                </td>
+  
+      {/* テーブルのスクロール対応 */}
+      <div className="w-full overflow-x-auto rounded-lg shadow">
+        <div className="min-w-[800px]"> {/* 最小幅を設定 */}
+          <table className="w-full bg-white border border-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">アイテム取得者</th>
+                <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">獲得アイテム</th>
+                <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">残り時間</th>
+                <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">使用期限</th>
+                <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">取得日時</th>
+                <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">操作</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {items.map(item => (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b text-gray-800">
+                    <select
+                      value={item.contributor}
+                      onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
+                      className="w-32 p-2 border rounded bg-white text-gray-800"
+                    >
+                      {contributors.map(contributor => (
+                        <option key={contributor} value={contributor}>
+                          {contributor}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-4 py-2 border-b text-gray-800">
+                    <select
+                      value={item.item}
+                      onChange={(e) => updateItem(item.id, 'item', e.target.value)}
+                      className="w-20 p-2 border rounded bg-white text-gray-800"
+                    >
+                      {ITEMS.map(itemOption => (
+                        <option key={itemOption} value={itemOption}>
+                          {itemOption}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-4 py-2 border-b text-gray-800">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      {getRemainingTime(item.expiryTime)}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 border-b text-gray-800">{formatDateTime(item.expiryTime)}</td>
+                  <td className="px-4 py-2 border-b text-gray-800">
+                    <input
+                      type="datetime-local"
+                      value={item.acquisitionTime.slice(0, 16)}
+                      onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+                      className="p-2 border rounded bg-white text-gray-800"
+                    />
+                  </td>
+                  <td className="px-4 py-2 border-b">
+                    <button
+                      onClick={() => deleteItem(item.id)}
+                      className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      削除
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-
+  
       <ContributorManager 
         isOpen={isContributorManagerOpen}
         onClose={() => setIsContributorManagerOpen(false)}
@@ -208,7 +286,7 @@ const TikTokItemManager = () => {
         setContributors={setContributors}
       />
     </div>
-  );
+  );  
 };
 
 export default TikTokItemManager;
