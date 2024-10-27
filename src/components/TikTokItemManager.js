@@ -229,10 +229,9 @@ const TikTokItemManager = () => {
         </div>
       </div>
   
-      {/* スクロール可能なテーブルコンテナ */}
-      <div className="relative w-full overflow-auto">
-  <div className="relative w-full overflow-x-auto touch-pan-x">
-    <div style={{ minWidth: '800px' }}>
+ {/* テーブル */}
+<div className="w-full overflow-x-auto">
+  <table className="w-full bg-white border border-gray-200"></table>
       <table className="w-full bg-white border border-gray-200">
               <thead className="bg-gray-50">
                 <tr>
