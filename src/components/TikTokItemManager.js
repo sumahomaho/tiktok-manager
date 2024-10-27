@@ -10,6 +10,31 @@ const ContributorManager = ({ isOpen, onClose, contributors, setContributors }) 
   const [newContributor, setNewContributor] = useState('');
   const [editingContributor, setEditingContributor] = useState({ index: -1, name: '' });
 
+  // これらの関数を追加
+  const handleAdd = () => {
+    if (newContributor.trim() && !contributors.includes(newContributor.trim())) {
+      setContributors([...contributors, newContributor.trim()]);
+      setNewContributor('');
+    }
+  };
+
+  const handleDelete = (index) => {
+    setContributors(contributors.filter((_, i) => i !== index));
+  };
+
+  const startEditing = (index, name) => {
+    setEditingContributor({ index, name });
+  };
+
+  const handleEdit = () => {
+    if (editingContributor.name.trim()) {
+      setContributors(contributors.map((c, i) => 
+        i === editingContributor.index ? editingContributor.name : c
+      ));
+      setEditingContributor({ index: -1, name: '' });
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
