@@ -230,10 +230,10 @@ const TikTokItemManager = () => {
       </div>
   
       {/* スクロール可能なテーブルコンテナ */}
-      <div className="w-full overflow-hidden">
-        <div className="w-full overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div style={{ minWidth: '800px', paddingBottom: '1rem' }}>
-            <table className="w-full bg-white border border-gray-200">
+      <div className="relative w-full overflow-auto">
+  <div className="relative w-full overflow-x-auto touch-pan-x">
+    <div style={{ minWidth: '800px' }}>
+      <table className="w-full bg-white border border-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">アイテム取得者</th>

@@ -75,3 +75,13 @@ body {
     }
   }
 }
+/* モバイルデバイスでのスクロール改善 */
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+}
