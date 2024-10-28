@@ -235,8 +235,8 @@ const TikTokItemManager = () => {
       <table className="w-full bg-white border border-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">アイテム取得者</th>
-                  <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">獲得アイテム</th>
+                  <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">取得者</th>
+                  <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">アイテム</th>
                   <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">残り時間</th>
                   <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">使用期限</th>
                   <th className="px-4 py-2 text-left border-b text-gray-800 whitespace-nowrap">取得日時</th>
