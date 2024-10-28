@@ -384,17 +384,17 @@ const TikTokItemManager = () => {
                   </select>
                 </td>
                 <td className="px-4 py-2 border-b">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    {getRemainingTime(item.expiryTime)}
-                  </div>
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <div className="flex flex-col">
-                    <span>{formatDateTime(item.expiryTime).date}</span>
-                    <span>{formatDateTime(item.expiryTime).time}</span>
-                  </div>
-                </td>
+  <div className="flex items-center gap-1 whitespace-nowrap">
+    <Clock className="w-4 h-4 shrink-0" />
+    {getRemainingTime(item.expiryTime)}
+  </div>
+</td>
+<td className="px-4 py-2 border-b">
+  <div className="flex flex-col items-center text-center min-w-[120px]">
+    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
+    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
+  </div>
+</td>                
                 <td className="px-4 py-2 border-b">
                   <input
                     type="datetime-local"
