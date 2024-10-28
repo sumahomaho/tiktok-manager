@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Trash2, Clock, Gift, UserPlus, Users, X, Edit2, Check } from 'lucide-react';
 
 const ITEMS = ['🥊', '☁️', '⏰️', '⚒️'];
+
+// 日本時間のオフセット（分）
 const JST_OFFSET_MINUTES = 9 * 60;
 
 const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) => {
@@ -121,7 +123,6 @@ const TikTokItemManager = () => {
     }
   });
 
-  const [selectedItems, setSelectedItems] = useState([]);
   const [contributors, setContributors] = useState(() => {
     try {
       const savedContributors = localStorage.getItem('tiktokContributors');
@@ -196,19 +197,12 @@ const TikTokItemManager = () => {
     }
   };
 
-  const deleteSelectedItems = () => {
+  const deleteItem = (id) => {
     try {
-      setItems(prevItems => prevItems.filter(item => !selectedItems.includes(item.id)));
-      setSelectedItems([]);
+      setItems(prevItems => prevItems.filter(item => item.id !== id));
     } catch (error) {
-      console.error('Error deleting items:', error);
+      console.error('Error deleting item:', error);
     }
-  };
-
-  const handleSelectItem = (id) => {
-    setSelectedItems(prev => 
-      prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]
-    );
   };
 
   const updateItem = (id, field, value) => {
@@ -250,13 +244,10 @@ const TikTokItemManager = () => {
       const hours = pad(date.getHours());
       const minutes = pad(date.getMinutes());
       
-      return {
-        date: `${year}/${month}/${day}`,
-        time: `${hours}:${minutes}`
-      };
+      return `${year}/${month}/${day} ${hours}:${minutes}`;
     } catch (error) {
       console.error('Error formatting date:', error);
-      return { date: 'Invalid Date', time: 'Invalid Time' };
+      return 'Invalid Date';
     }
   };
 
@@ -307,17 +298,8 @@ const TikTokItemManager = () => {
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             <Gift className="w-4 h-4" />
-            アイテム追加
+            新規アイテム追加
           </button>
-          {selectedItems.length > 0 && (
-            <button
-              onClick={deleteSelectedItems}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              <Trash2 className="w-4 h-4" />
-              選択削除 ({selectedItems.length})
-            </button>
-          )}
         </div>
       </div>
 
@@ -325,95 +307,71 @@ const TikTokItemManager = () => {
         <table className="min-w-full bg-white border border-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="w-8 px-4 py-2 text-left border-b">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.length === items.length && items.length > 0}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedItems(items.map(item => item.id));
-                    } else {
-                      setSelectedItems([]);
-                    }
-                  }}
-                  className="rounded"
-                />
-              </th>
               <th className="px-4 py-2 text-left border-b">ユーザー</th>
               <th className="px-4 py-2 text-left border-b">アイテム</th>
               <th className="px-4 py-2 text-left border-b">残り時間</th>
               <th className="px-4 py-2 text-left border-b">使用期限</th>
               <th className="px-4 py-2 text-left border-b">取得日時</th>
+              <th className="px-4 py-2 text-left border-b">操作</th>
             </tr>
           </thead>
-          // テーブルの該当部分を修正
-<tbody>
-  {items.map(item => (
-    <tr key={item.id} className="hover:bg-gray-50">
-      <td className="px-4 py-2 border-b">
-        <input
-          type="checkbox"
-          checked={selectedItems.includes(item.id)}
-          onChange={() => handleSelectItem(item.id)}
-          className="rounded"
-        />
-      </td>
-      <td className="px-4 py-2 border-b">
-        <select
-          value={item.contributor}
-          onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
-          className="w-32 p-2 border rounded"
-        >
-          {contributors.map(contributor => (
-            <option key={contributor} value={contributor}>
-              {contributor}
-            </option>
-          ))}
-        </select>
-      </td>
-      <td className="px-4 py-2 border-b">
-        <select
-          value={item.item}
-          onChange={(e) => updateItem(item.id, 'item', e.target.value)}
-          className="w-20 p-2 border rounded"
-        >
-          {ITEMS.map(itemOption => (
-            <option key={itemOption} value={itemOption}>
-              {itemOption}
-            </option>
-          ))}
-        </select>
-      </td>
-      <td className="px-4 py-2 border-b">
-        <div className="flex items-center gap-1 whitespace-nowrap">
-          <Clock className="w-4 h-4 shrink-0" />
-          {getRemainingTime(item.expiryTime)}
-        </div>
-      </td>
-      <td className="px-4 py-2 border-b">
-        <div className="flex flex-col items-center text-center min-w-[120px]">
-          <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
-          <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
-        </div>
-      </td>
-      <td className="px-4 py-2 border-b">
-        <div className="flex flex-col items-center text-center min-w-[120px]">
-          <input
-            type="datetime-local"
-            value={formatInputDateTime(item.acquisitionTime)}
-            onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-            className="p-2 border rounded text-center w-full"
-            step="60"
-          />
-          <div className="whitespace-nowrap mt-1">
-            <div>{formatDateTime(item.acquisitionTime).date}</div>
-            <div>{formatDateTime(item.acquisitionTime).time}</div>
-          </div>
-        </div>
-      </td>
-    </tr>
-  ))}
-</tbody>
+          <tbody>
+            {items.map(item => (
+              <tr key={item.id} className="hover:bg-gray-50">
+                <td className="px-4 py-2 border-b">
+                  <select
+                    value={item.contributor}
+                    onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
+                    className="w-32 p-2 border rounded"
+                  >
+                    {contributors.map(contributor => (
+                      <option key={contributor} value={contributor}>
+                        {contributor}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <select
+                    value={item.item}
+                    onChange={(e) => updateItem(item.id, 'item', e.target.value)}
+                    className="w-20 p-2 border rounded"
+                  >
+                    {ITEMS.map(itemOption => (
+                      <option key={itemOption} value={itemOption}>
+                        {itemOption}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    {getRemainingTime(item.expiryTime)}
+                  </div>
+                </td>
+                <td className="px-4 py-2 border-b">{formatDateTime(item.expiryTime)}</td>
+                <td className="px-4 py-2 border-b">
+                  <input
+                    type="datetime-local"
+                    value={formatInputDateTime(item.acquisitionTime)}
+                    onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+                    className="p-2 border rounded"
+                    step="60"
+                  />
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <button
+                    onClick={() => deleteItem(item.id)}
+                    className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    削除
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
@@ -428,6 +386,3 @@ const TikTokItemManager = () => {
 };
 
 export default TikTokItemManager;
-
-
-
