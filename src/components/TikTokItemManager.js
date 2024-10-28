@@ -346,72 +346,74 @@ const TikTokItemManager = () => {
               <th className="px-4 py-2 text-left border-b">取得日時</th>
             </tr>
           </thead>
-          <tbody>
-            {items.map(item => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border-b">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(item.id)}
-                    onChange={() => handleSelectItem(item.id)}
-                    className="rounded"
-                  />
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <select
-                    value={item.contributor}
-                    onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
-                    className="w-32 p-2 border rounded"
-                  >
-                    {contributors.map(contributor => (
-                      <option key={contributor} value={contributor}>
-                        {contributor}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <select
-                    value={item.item}
-                    onChange={(e) => updateItem(item.id, 'item', e.target.value)}
-                    className="w-20 p-2 border rounded"
-                  >
-                    {ITEMS.map(itemOption => (
-                      <option key={itemOption} value={itemOption}>
-                        {itemOption}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-2 border-b">
-  <div className="flex items-center gap-1 whitespace-nowrap">
-    <Clock className="w-4 h-4 shrink-0" />
-    {getRemainingTime(item.expiryTime)}
-  </div>
-</td>
-<td className="px-4 py-2 border-b">
-  <div className="flex flex-col items-center text-center min-w-[120px]">
-    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
-    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
-  </div>
-  <td className="px-4 py-2 border-b">
-  <div className="flex flex-col items-center text-center min-w-[120px]">
-    <input
-      type="datetime-local"
-      value={formatInputDateTime(item.acquisitionTime)}
-      onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-      className="p-2 border rounded text-center w-full"
-      step="60"
-    />
-    <div className="whitespace-nowrap mt-1">
-      <div>{formatDateTime(item.acquisitionTime).date}</div>
-      <div>{formatDateTime(item.acquisitionTime).time}</div>
-    </div>
-  </div>
-</td>
-              </tr>
-            ))}
-          </tbody>
+          // テーブルの該当部分を修正
+<tbody>
+  {items.map(item => (
+    <tr key={item.id} className="hover:bg-gray-50">
+      <td className="px-4 py-2 border-b">
+        <input
+          type="checkbox"
+          checked={selectedItems.includes(item.id)}
+          onChange={() => handleSelectItem(item.id)}
+          className="rounded"
+        />
+      </td>
+      <td className="px-4 py-2 border-b">
+        <select
+          value={item.contributor}
+          onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
+          className="w-32 p-2 border rounded"
+        >
+          {contributors.map(contributor => (
+            <option key={contributor} value={contributor}>
+              {contributor}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-4 py-2 border-b">
+        <select
+          value={item.item}
+          onChange={(e) => updateItem(item.id, 'item', e.target.value)}
+          className="w-20 p-2 border rounded"
+        >
+          {ITEMS.map(itemOption => (
+            <option key={itemOption} value={itemOption}>
+              {itemOption}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-4 py-2 border-b">
+        <div className="flex items-center gap-1 whitespace-nowrap">
+          <Clock className="w-4 h-4 shrink-0" />
+          {getRemainingTime(item.expiryTime)}
+        </div>
+      </td>
+      <td className="px-4 py-2 border-b">
+        <div className="flex flex-col items-center text-center min-w-[120px]">
+          <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
+          <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
+        </div>
+      </td>
+      <td className="px-4 py-2 border-b">
+        <div className="flex flex-col items-center text-center min-w-[120px]">
+          <input
+            type="datetime-local"
+            value={formatInputDateTime(item.acquisitionTime)}
+            onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+            className="p-2 border rounded text-center w-full"
+            step="60"
+          />
+          <div className="whitespace-nowrap mt-1">
+            <div>{formatDateTime(item.acquisitionTime).date}</div>
+            <div>{formatDateTime(item.acquisitionTime).time}</div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  ))}
+</tbody>
         </table>
       </div>
 
