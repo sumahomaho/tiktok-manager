@@ -394,16 +394,21 @@ const TikTokItemManager = () => {
     <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
     <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
   </div>
-</td>                
-                <td className="px-4 py-2 border-b">
-                  <input
-                    type="datetime-local"
-                    value={formatInputDateTime(item.acquisitionTime)}
-                    onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-                    className="p-2 border rounded"
-                    step="60"
-                  />
-                </td>
+  <td className="px-4 py-2 border-b">
+  <div className="flex flex-col items-center text-center min-w-[120px]">
+    <input
+      type="datetime-local"
+      value={formatInputDateTime(item.acquisitionTime)}
+      onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+      className="p-2 border rounded text-center w-full"
+      step="60"
+    />
+    <div className="whitespace-nowrap mt-1">
+      <div>{formatDateTime(item.acquisitionTime).date}</div>
+      <div>{formatDateTime(item.acquisitionTime).time}</div>
+    </div>
+  </div>
+</td>
               </tr>
             ))}
           </tbody>
