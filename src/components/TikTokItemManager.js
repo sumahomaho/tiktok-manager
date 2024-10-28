@@ -111,7 +111,87 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
     </div>
   );
 };
+const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
+  const [newItem, setNewItem] = useState({
+    contributor: contributors[0],
+    item: ITEMS[0],
+    acquisitionTime: new Date().toISOString().slice(0, 16)
+  });
 
+  if (!isOpen) return null;
+
+  const handleAdd = () => {
+    addItem(newItem);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">アイテム追加</h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-2">ユーザー</label>
+            <select
+              value={newItem.contributor}
+              onChange={(e) => setNewItem({...newItem, contributor: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              {contributors.map(contributor => (
+                <option key={contributor} value={contributor}>
+                  {contributor}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2">アイテム</label>
+            <select
+              value={newItem.item}
+              onChange={(e) => setNewItem({...newItem, item: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              {ITEMS.map(itemOption => (
+                <option key={itemOption} value={itemOption}>
+                  {itemOption}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2">取得日時</label>
+            <input
+              type="datetime-local"
+              value={newItem.acquisitionTime}
+              onChange={(e) => setNewItem({...newItem, acquisitionTime: e.target.value})}
+              className="w-full p-2 border rounded"
+              step="60"
+            />
+          </div>
+
+          <button
+            onClick={handleAdd}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            <Gift className="w-4 h-4" />
+            追加
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 const TikTokItemManager = () => {
   const [items, setItems] = useState(() => {
     try {
@@ -178,19 +258,22 @@ const TikTokItemManager = () => {
     }
   };
 
-  const addItem = () => {
+  const addItem = (newItemData) => {
     try {
-      const now = getJapanDateTime();
-      const expiryTime = new Date(now.getTime() + 120 * 60 * 60 * 1000);
-
+      const inputDate = new Date(newItemData.acquisitionTime);
+      const userOffset = inputDate.getTimezoneOffset();
+      const totalOffset = userOffset + JST_OFFSET_MINUTES;
+      const adjustedTime = new Date(inputDate.getTime() + totalOffset * 60000);
+      const expiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
+  
       const newItem = {
         id: Date.now(),
-        contributor: contributors[0],
-        item: ITEMS[0],
-        acquisitionTime: now.toISOString(),
+        contributor: newItemData.contributor,
+        item: newItemData.item,
+        acquisitionTime: adjustedTime.toISOString(),
         expiryTime: expiryTime.toISOString(),
       };
-
+  
       setItems(prevItems => [...prevItems, newItem]);
     } catch (error) {
       console.error('Error adding item:', error);
@@ -235,7 +318,7 @@ const TikTokItemManager = () => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) throw new Error('Invalid date');
-
+  
       const pad = (num) => String(num).padStart(2, '0');
       
       const year = date.getFullYear();
@@ -244,10 +327,13 @@ const TikTokItemManager = () => {
       const hours = pad(date.getHours());
       const minutes = pad(date.getMinutes());
       
-      return `${year}/${month}/${day} ${hours}:${minutes}`;
+      return {
+        date: `${year}/${month}/${day}`,
+        time: `${hours}:${minutes}`
+      };
     } catch (error) {
       console.error('Error formatting date:', error);
-      return 'Invalid Date';
+      return { date: 'Invalid Date', time: 'Invalid Time' };
     }
   };
 
@@ -283,25 +369,25 @@ const TikTokItemManager = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">TikTok ライブバトルアイテム管理</h1>
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setIsContributorModalOpen(true)} 
-            className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            <Users className="w-4 h-4" />
-            ユーザー管理
-          </button>
-          <button 
-            onClick={addItem} 
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            <Gift className="w-4 h-4" />
-            新規アイテム追加
-          </button>
-        </div>
-      </div>
+    <div className="flex justify-between items-center">
+  <h1 className="text-2xl font-bold">TikTok ライブバトルアイテム管理</h1>
+  <div className="flex gap-2">
+    <button 
+      onClick={() => setIsContributorModalOpen(true)} 
+      className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+    >
+      <Users className="w-4 h-4" />
+      ユーザー管理
+    </button>
+    <button 
+      onClick={() => setIsItemAddModalOpen(true)}
+      className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+      <Gift className="w-4 h-4" />
+      アイテム追加
+    </button>
+  </div>
+</div>  
 
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200">
@@ -345,30 +431,26 @@ const TikTokItemManager = () => {
                   </select>
                 </td>
                 <td className="px-4 py-2 border-b">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    {getRemainingTime(item.expiryTime)}
-                  </div>
-                </td>
-                <td className="px-4 py-2 border-b">{formatDateTime(item.expiryTime)}</td>
-                <td className="px-4 py-2 border-b">
-                  <input
-                    type="datetime-local"
-                    value={formatInputDateTime(item.acquisitionTime)}
-                    onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-                    className="p-2 border rounded"
-                    step="60"
-                  />
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <button
-                    onClick={() => deleteItem(item.id)}
-                    className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    削除
-                  </button>
-                </td>
+  <div className="flex flex-col items-center text-center min-w-[120px]">
+    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
+    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
+  </div>
+</td>
+<td className="px-4 py-2 border-b">
+  <div className="flex flex-col items-center text-center min-w-[120px]">
+    <input
+      type="datetime-local"
+      value={formatInputDateTime(item.acquisitionTime)}
+      onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+      className="p-2 border rounded text-center w-full"
+      step="60"
+    />
+    <div className="whitespace-nowrap mt-1">
+      <div>{formatDateTime(item.acquisitionTime).date}</div>
+      <div>{formatDateTime(item.acquisitionTime).time}</div>
+    </div>
+  </div>
+</td>  
               </tr>
             ))}
           </tbody>
@@ -381,6 +463,12 @@ const TikTokItemManager = () => {
         contributors={contributors}
         setContributors={setContributors}
       />
+      <ItemAddModal
+  isOpen={isItemAddModalOpen}
+  onClose={() => setIsItemAddModalOpen(false)}
+  contributors={contributors}
+  addItem={addItem}
+/>
     </div>
   );
 };
