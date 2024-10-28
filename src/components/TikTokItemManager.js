@@ -144,10 +144,11 @@ const TikTokItemManager = () => {
     return () => clearInterval(interval);
   }, [items, contributors]);
 
-  // 日本時間を取得する関数
   const getJapanDateTime = () => {
     const now = new Date();
-    return new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60000);
+    const jstOffset = 9 * 60;
+    const currentOffset = now.getTimezoneOffset();
+    return new Date(now.getTime() + (currentOffset + jstOffset) * 60000);
   };
 
   const addItem = () => {
@@ -176,7 +177,11 @@ const TikTokItemManager = () => {
         
         if (field === 'acquisitionTime') {
           const newAcquisitionTime = new Date(value);
-          const newExpiryTime = new Date(newAcquisitionTime.getTime() + 120 * 60 * 60 * 1000);
+          const jstOffset = 9 * 60;
+          const currentOffset = newAcquisitionTime.getTimezoneOffset();
+          const adjustedTime = new Date(newAcquisitionTime.getTime() + (currentOffset + jstOffset) * 60000);
+          const newExpiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
+          updatedItem.acquisitionTime = adjustedTime.toISOString();
           updatedItem.expiryTime = newExpiryTime.toISOString();
         }
         
@@ -189,7 +194,16 @@ const TikTokItemManager = () => {
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     const japanTime = new Date(date.getTime() + (date.getTimezoneOffset() + 9 * 60) * 60000);
-    return `${japanTime.getMonth() + 1}月${japanTime.getDate()}日${japanTime.getHours()}時${japanTime.getMinutes()}分`;
+    
+    const pad = (num) => String(num).padStart(2, '0');
+    
+    const year = japanTime.getFullYear();
+    const month = pad(japanTime.getMonth() + 1);
+    const day = pad(japanTime.getDate());
+    const hours = pad(japanTime.getHours());
+    const minutes = pad(japanTime.getMinutes());
+    
+    return `${year}/${month}/${day} ${hours}:${minutes}`;
   };
 
   const getRemainingTime = (expiryTime) => {
@@ -279,6 +293,7 @@ const TikTokItemManager = () => {
                     value={item.acquisitionTime.slice(0, 16)}
                     onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
                     className="p-2 border rounded"
+                    step="60"
                   />
                 </td>
                 <td className="px-4 py-2 border-b">
