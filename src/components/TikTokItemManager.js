@@ -3,132 +3,282 @@ import { Trash2, Clock, Gift, UserPlus, Users, X, Edit2, Check } from 'lucide-re
 
 const ITEMS = ['🥊', '☁️', '⏰️', '⚒️'];
 
-// 日本時間のオフセット（ミリ秒）
-const JST_OFFSET = 9 * 60 * 60 * 1000;
+// 日本時間のオフセット（分）
+const JST_OFFSET_MINUTES = 9 * 60;
 
 const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) => {
-  // ... ContributorModal のコードは変更なし ...
-  // 省略時間の都合上、前回と同じコードを使用
-  [前のContributorModalコードをここに配置]
+  const [newContributor, setNewContributor] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editingName, setEditingName] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleAdd = () => {
+    if (newContributor.trim() && !contributors.includes(newContributor.trim())) {
+      setContributors([...contributors, newContributor.trim()]);
+      setNewContributor('');
+    }
+  };
+
+  const handleDelete = (contributor) => {
+    setContributors(contributors.filter(c => c !== contributor));
+  };
+
+  const startEditing = (contributor) => {
+    setEditingId(contributor);
+    setEditingName(contributor);
+  };
+
+  const handleEdit = () => {
+    if (editingName.trim() && !contributors.includes(editingName.trim())) {
+      setContributors(contributors.map(c => 
+        c === editingId ? editingName.trim() : c
+      ));
+    }
+    setEditingId(null);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">ユーザー管理</h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="mb-4 flex gap-2">
+          <input
+            type="text"
+            value={newContributor}
+            onChange={(e) => setNewContributor(e.target.value)}
+            placeholder="新規ユーザー名"
+            className="flex-1 p-2 border rounded"
+          />
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-1 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            <UserPlus className="w-4 h-4" />
+            追加
+          </button>
+        </div>
+
+        <ul className="space-y-2">
+          {contributors.map(contributor => (
+            <li key={contributor} className="flex items-center gap-2 p-2 border rounded">
+              {editingId === contributor ? (
+                <>
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    className="flex-1 p-1 border rounded"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleEdit}
+                    className="p-1 text-green-500 hover:bg-green-50 rounded"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="flex-1">{contributor}</span>
+                  <button
+                    onClick={() => startEditing(contributor)}
+                    className="p-1 text-blue-500 hover:bg-blue-50 rounded"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(contributor)}
+                    className="p-1 text-red-500 hover:bg-red-50 rounded"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 };
 
 const TikTokItemManager = () => {
   const [items, setItems] = useState(() => {
-    const savedItems = localStorage.getItem('tiktokItems');
-    return savedItems ? JSON.parse(savedItems) : [];
+    try {
+      const savedItems = localStorage.getItem('tiktokItems');
+      return savedItems ? JSON.parse(savedItems) : [];
+    } catch (error) {
+      console.error('Error loading items:', error);
+      return [];
+    }
   });
 
   const [contributors, setContributors] = useState(() => {
-    const savedContributors = localStorage.getItem('tiktokContributors');
-    return savedContributors ? JSON.parse(savedContributors) : [
-      'ユーザー1',
-      'ユーザー2',
-      'ユーザー3',
-      'ユーザー4',
-      'ユーザー5'
-    ];
+    try {
+      const savedContributors = localStorage.getItem('tiktokContributors');
+      return savedContributors ? JSON.parse(savedContributors) : [
+        'ユーザー1',
+        'ユーザー2',
+        'ユーザー3',
+        'ユーザー4',
+        'ユーザー5'
+      ];
+    } catch (error) {
+      console.error('Error loading contributors:', error);
+      return ['ユーザー1', 'ユーザー2', 'ユーザー3', 'ユーザー4', 'ユーザー5'];
+    }
   });
 
   const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('tiktokItems', JSON.stringify(items));
-    localStorage.setItem('tiktokContributors', JSON.stringify(contributors));
+    try {
+      localStorage.setItem('tiktokItems', JSON.stringify(items));
+      localStorage.setItem('tiktokContributors', JSON.stringify(contributors));
 
-    const interval = setInterval(() => {
-      setItems(currentItems => 
-        currentItems.filter(item => {
-          const expiryTime = new Date(item.expiryTime).getTime();
-          return expiryTime > Date.now();
-        })
-      );
-    }, 60000);
+      const interval = setInterval(() => {
+        setItems(currentItems => 
+          currentItems.filter(item => {
+            try {
+              const expiryTime = new Date(item.expiryTime).getTime();
+              return expiryTime > Date.now();
+            } catch (error) {
+              console.error('Error checking expiry:', error);
+              return false;
+            }
+          })
+        );
+      }, 60000);
 
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    } catch (error) {
+      console.error('Error in useEffect:', error);
+    }
   }, [items, contributors]);
 
-  // 修正: 日本時間を取得する関数
   const getJapanDateTime = () => {
-    const now = new Date();
-    // UTCミリ秒を取得し、JSTオフセットを加算
-    const jstTime = now.getTime() + JST_OFFSET;
-    return new Date(jstTime);
+    try {
+      const now = new Date();
+      const userOffset = now.getTimezoneOffset();
+      const totalOffset = userOffset + JST_OFFSET_MINUTES;
+      return new Date(now.getTime() + totalOffset * 60000);
+    } catch (error) {
+      console.error('Error getting Japan time:', error);
+      return new Date();
+    }
   };
 
   const addItem = () => {
-    const now = getJapanDateTime();
-    const expiryTime = new Date(now.getTime() + 120 * 60 * 60 * 1000);
+    try {
+      const now = getJapanDateTime();
+      const expiryTime = new Date(now.getTime() + 120 * 60 * 60 * 1000);
 
-    const newItem = {
-      id: Date.now(),
-      contributor: contributors[0],
-      item: ITEMS[0],
-      acquisitionTime: now.toISOString(),
-      expiryTime: expiryTime.toISOString(),
-    };
+      const newItem = {
+        id: Date.now(),
+        contributor: contributors[0],
+        item: ITEMS[0],
+        acquisitionTime: now.toISOString(),
+        expiryTime: expiryTime.toISOString(),
+      };
 
-    setItems([...items, newItem]);
+      setItems(prevItems => [...prevItems, newItem]);
+    } catch (error) {
+      console.error('Error adding item:', error);
+    }
   };
 
   const deleteItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
+    try {
+      setItems(prevItems => prevItems.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    }
   };
 
-  // 修正: 時間更新の関数
   const updateItem = (id, field, value) => {
-    setItems(items.map(item => {
-      if (item.id === id) {
-        const updatedItem = { ...item, [field]: value };
-        
-        if (field === 'acquisitionTime') {
-          const inputDate = new Date(value);
-          // 入力された時間をJSTとして扱い、UTCに変換
-          const utcTime = inputDate.getTime() + JST_OFFSET;
-          const adjustedTime = new Date(utcTime);
-          const newExpiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
-          updatedItem.acquisitionTime = adjustedTime.toISOString();
-          updatedItem.expiryTime = newExpiryTime.toISOString();
+    try {
+      setItems(prevItems => prevItems.map(item => {
+        if (item.id === id) {
+          const updatedItem = { ...item, [field]: value };
+          
+          if (field === 'acquisitionTime') {
+            const inputDate = new Date(value);
+            const userOffset = inputDate.getTimezoneOffset();
+            const totalOffset = userOffset + JST_OFFSET_MINUTES;
+            const adjustedTime = new Date(inputDate.getTime() + totalOffset * 60000);
+            const newExpiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
+            
+            updatedItem.acquisitionTime = adjustedTime.toISOString();
+            updatedItem.expiryTime = newExpiryTime.toISOString();
+          }
+          
+          return updatedItem;
         }
-        
-        return updatedItem;
-      }
-      return item;
-    }));
+        return item;
+      }));
+    } catch (error) {
+      console.error('Error updating item:', error);
+    }
   };
 
-  // 修正: 表示用の日時フォーマット
   const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    const jstTime = new Date(date.getTime() + JST_OFFSET);
-    
-    const pad = (num) => String(num).padStart(2, '0');
-    
-    const year = jstTime.getFullYear();
-    const month = pad(jstTime.getMonth() + 1);
-    const day = pad(jstTime.getDate());
-    const hours = pad(jstTime.getHours());
-    const minutes = pad(jstTime.getMinutes());
-    
-    return `${year}/${month}/${day} ${hours}:${minutes}`;
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) throw new Error('Invalid date');
+
+      const pad = (num) => String(num).padStart(2, '0');
+      
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const hours = pad(date.getHours());
+      const minutes = pad(date.getMinutes());
+      
+      return `${year}/${month}/${day} ${hours}:${minutes}`;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
+  };
+
+  const formatInputDateTime = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) throw new Error('Invalid date');
+      
+      const userOffset = date.getTimezoneOffset();
+      const adjustedDate = new Date(date.getTime() - userOffset * 60000);
+      return adjustedDate.toISOString().slice(0, 16);
+    } catch (error) {
+      console.error('Error formatting input date:', error);
+      return '';
+    }
   };
 
   const getRemainingTime = (expiryTime) => {
-    const remaining = new Date(expiryTime).getTime() - Date.now();
-    if (remaining <= 0) return '期限切れ';
-    
-    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return `${days}日${hours}時間${minutes}分`;
-  };
-
-  // 修正: 入力フィールド用の時間フォーマット
-  const formatInputDateTime = (dateString) => {
-    const date = new Date(dateString);
-    // UTCの時間からJSTの時間を計算し、ブラウザのローカルタイムゾーンに合わせる
-    const jstTime = new Date(date.getTime());
-    return jstTime.toISOString().slice(0, 16);
+    try {
+      const remaining = new Date(expiryTime).getTime() - Date.now();
+      if (remaining <= 0) return '期限切れ';
+      
+      const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      
+      return `${days}日${hours}時間${minutes}分`;
+    } catch (error) {
+      console.error('Error calculating remaining time:', error);
+      return '計算エラー';
+    }
   };
 
   return (
