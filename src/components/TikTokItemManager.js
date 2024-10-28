@@ -146,9 +146,8 @@ const TikTokItemManager = () => {
 
   const getJapanDateTime = () => {
     const now = new Date();
-    const jstOffset = 9 * 60;
-    const currentOffset = now.getTimezoneOffset();
-    return new Date(now.getTime() + (currentOffset + jstOffset) * 60000);
+    const japanTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (9 * 60 * 60000));
+    return japanTime;
   };
 
   const addItem = () => {
@@ -177,9 +176,7 @@ const TikTokItemManager = () => {
         
         if (field === 'acquisitionTime') {
           const newAcquisitionTime = new Date(value);
-          const jstOffset = 9 * 60;
-          const currentOffset = newAcquisitionTime.getTimezoneOffset();
-          const adjustedTime = new Date(newAcquisitionTime.getTime() + (currentOffset + jstOffset) * 60000);
+          const adjustedTime = new Date(newAcquisitionTime.getTime() + (9 * 60 * 60000));
           const newExpiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
           updatedItem.acquisitionTime = adjustedTime.toISOString();
           updatedItem.expiryTime = newExpiryTime.toISOString();
@@ -193,7 +190,7 @@ const TikTokItemManager = () => {
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    const japanTime = new Date(date.getTime() + (date.getTimezoneOffset() + 9 * 60) * 60000);
+    const japanTime = new Date(date.getTime());
     
     const pad = (num) => String(num).padStart(2, '0');
     
@@ -215,6 +212,13 @@ const TikTokItemManager = () => {
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     
     return `${days}日${hours}時間${minutes}分`;
+  };
+
+  // 入力フィールド用の時間フォーマット関数を追加
+  const formatInputDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const localDate = new Date(date.getTime() - (9 * 60 * 60000));
+    return localDate.toISOString().slice(0, 16);
   };
 
   return (
@@ -290,7 +294,7 @@ const TikTokItemManager = () => {
                 <td className="px-4 py-2 border-b">
                   <input
                     type="datetime-local"
-                    value={item.acquisitionTime.slice(0, 16)}
+                    value={formatInputDateTime(item.acquisitionTime)}
                     onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
                     className="p-2 border rounded"
                     step="60"
