@@ -296,9 +296,8 @@ const TikTokItemManager = () => {
           
           if (field === 'acquisitionTime') {
             const inputDate = new Date(value);
-            const userOffset = inputDate.getTimezoneOffset();
-            const totalOffset = userOffset + JST_OFFSET_MINUTES;
-            const adjustedTime = new Date(inputDate.getTime() + totalOffset * 60000);
+            // 入力値をそのまま日本時間として扱う
+            const adjustedTime = new Date(inputDate.getTime());
             const newExpiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
             
             updatedItem.acquisitionTime = adjustedTime.toISOString();
@@ -348,18 +347,7 @@ const TikTokItemManager = () => {
       console.error('Error formatting input date:', error);
       return '';
     }
-  };
-  
-  // および、updateItem関数内の時間調整部分を修正
-  if (field === 'acquisitionTime') {
-    const inputDate = new Date(value);
-    // 入力値をそのまま日本時間として扱う
-    const adjustedTime = new Date(inputDate.getTime());
-    const newExpiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
-    
-    updatedItem.acquisitionTime = adjustedTime.toISOString();
-    updatedItem.expiryTime = newExpiryTime.toISOString();
-  }  
+  }; 
 
   const getRemainingTime = (expiryTime) => {
     try {
