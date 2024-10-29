@@ -112,11 +112,14 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
   );
 };
 const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
+  const now = new Date();
+  const jstTime = new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60000);
+  
   const [newItem, setNewItem] = useState({
     contributor: contributors[0],
     item: ITEMS[0],
-    acquisitionTime: new Date().toISOString().slice(0, 16)
-  });
+    acquisitionTime: jstTime.toISOString().slice(0, 16)
+  });  
 
   if (!isOpen) return null;
 
@@ -330,7 +333,7 @@ const TikTokItemManager = () => {
       const minutes = pad(date.getMinutes());
       
       return {
-        date: `${year}/${month}/${day}`,
+        date: `${month}/${day}`,  // 年を削除
         time: `${hours}:${minutes}`
       };
     } catch (error) {
@@ -388,24 +391,36 @@ const TikTokItemManager = () => {
       <Gift className="w-4 h-4" />
       アイテム追加
     </button>
+    {items.length > 0 && (
+      <button 
+        onClick={() => {
+          if (window.confirm('選択したアイテムを削除しますか？')) {
+            setItems([]);
+          }
+        }}
+        className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
+        <Trash2 className="w-4 h-4" />
+        全削除
+      </button>
+    )}
   </div>
-</div>  
+</div>
 
       <div className="overflow-x-auto">
       <table className="min-w-full bg-white border border-gray-200">
-  <thead className="bg-gray-50">
-    <tr>
-      <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
-      <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
-      <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
-      <th className="px-4 py-2 text-center border-b whitespace-nowrap">使用期限</th>
-      <th className="px-4 py-2 text-center border-b whitespace-nowrap">取得日時</th>
-      <th className="px-4 py-2 text-left border-b whitespace-nowrap">操作</th>
-    </tr>
-  </thead>
-  <tbody>
+      <thead className="bg-gray-50">
+  <tr>
+    <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
+    <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
+    <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
+    <th className="px-4 py-2 text-center border-b whitespace-nowrap">使用期限</th>
+    <th className="px-4 py-2 text-center border-b whitespace-nowrap">取得日時</th>
+  </tr>
+</thead>
+<tbody>
     {items.map(item => (
-      <tr key={item.id} className="hover:bg-gray-50">
+    <tr key={item.id} className="hover:bg-gray-50">
         <td className="px-4 py-2 border-b">
           <select
             value={item.contributor}
@@ -433,44 +448,29 @@ const TikTokItemManager = () => {
           </select>
         </td>
         <td className="px-4 py-2 border-b">
-          <div className="flex items-center gap-1 whitespace-nowrap">
-            <Clock className="w-4 h-4 shrink-0" />
-            {getRemainingTime(item.expiryTime)}
-          </div>
-        </td>
-        <td className="px-4 py-2 border-b">
-          <div className="flex flex-col items-center text-center min-w-[120px]">
-            <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
-            <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
-          </div>
-        </td>
-        <td className="px-4 py-2 border-b">
-          <div className="flex flex-col items-center text-center min-w-[120px]">
-            <input
-              type="datetime-local"
-              value={formatInputDateTime(item.acquisitionTime)}
-              onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-              className="p-2 border rounded text-center w-full"
-              step="60"
-            />
-            <div className="whitespace-nowrap mt-1">
-              <div>{formatDateTime(item.acquisitionTime).date}</div>
-              <div>{formatDateTime(item.acquisitionTime).time}</div>
-            </div>
-          </div>
-        </td>
-        <td className="px-4 py-2 border-b">
-          <button
-            onClick={() => deleteItem(item.id)}
-            className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            <Trash2 className="w-4 h-4" />
-            削除
-          </button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
+        <div className="flex items-center gap-1 whitespace-nowrap">
+          <Clock className="w-4 h-4 shrink-0" />
+          {getRemainingTime(item.expiryTime)}
+        </div>
+      </td>
+      <td className="px-4 py-2 border-b">
+        <div className="flex flex-col items-center text-center min-w-[120px]">
+          <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
+          <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
+        </div>
+      </td>
+      <td className="px-4 py-2 border-b">
+        <input
+          type="datetime-local"
+          value={formatInputDateTime(item.acquisitionTime)}
+          onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+          className="p-2 border rounded text-center w-full"
+          step="60"
+        />
+      </td>
+    </tr>
+  ))}
+</tbody>        
 </table>  
       </div>
 
