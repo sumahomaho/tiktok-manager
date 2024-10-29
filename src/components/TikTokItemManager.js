@@ -35,7 +35,92 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
       setNewContributor('');
     }
   };
+// ContributorModalの後に以下のコードを追加
+const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
+  const [newItem, setNewItem] = useState(() => {
+    const now = new Date();
+    const jstTime = new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60000);
+    return {
+      contributor: contributors[0],
+      item: ITEMS[0],
+      acquisitionTime: jstTime.toISOString().slice(0, 16)
+    };
+  });
 
+  if (!isOpen) return null;
+
+  const handleAdd = () => {
+    addItem(newItem);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">アイテム追加</h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-2">ユーザー</label>
+            <select
+              value={newItem.contributor}
+              onChange={(e) => setNewItem({...newItem, contributor: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              {contributors.map(contributor => (
+                <option key={contributor} value={contributor}>
+                  {contributor}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2">アイテム</label>
+            <select
+              value={newItem.item}
+              onChange={(e) => setNewItem({...newItem, item: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              {ITEMS.map(itemOption => (
+                <option key={itemOption} value={itemOption}>
+                  {itemOption}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2">取得日時</label>
+            <input
+              type="datetime-local"
+              value={newItem.acquisitionTime}
+              onChange={(e) => setNewItem({...newItem, acquisitionTime: e.target.value})}
+              className="w-full p-2 border rounded"
+              step="60"
+            />
+          </div>
+
+          <button
+            onClick={handleAdd}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            <Gift className="w-4 h-4" />
+            追加
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
   const handleDelete = (contributor) => {
     setContributors(contributors.filter(c => c !== contributor));
   };
