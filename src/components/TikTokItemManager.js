@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Gift, UserPlus, Users, X, Edit2, Check } from 'lucide-react';
+import { ref, onValue, set, push, update } from 'firebase/database';
+import { db } from '../firebase/config';
 
 const ITEMS = ['🥊', '☁️', '⏰️', '⚒️'];
 const JST_OFFSET_MINUTES = 9 * 60;
@@ -19,8 +21,20 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
     }
   };
 
-  const handleDelete = (contributor) => {
-    setContributors(contributors.filter(c => c !== contributor));
+  const handleDeleteSelected = () => {
+    if (selectedItems.length > 0) {
+      if (window.confirm('選択したアイテムを削除しますか？')) {
+        try {
+          selectedItems.forEach(id => {
+            const itemRef = ref(db, `items/${id}`);
+            set(itemRef, null);
+          });
+          setSelectedItems([]);
+        } catch (error) {
+          console.error('Error deleting items:', error);
+        }
+      }
+    }
   };
 
   const startEditing = (contributor) => {
@@ -240,28 +254,40 @@ const TikTokItemManager = () => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('tiktokItems', JSON.stringify(items));
-      localStorage.setItem('tiktokContributors', JSON.stringify(contributors));
-
-      const interval = setInterval(() => {
-        setItems(currentItems => 
-          currentItems.filter(item => {
-            try {
-              const expiryTime = new Date(item.expiryTime).getTime();
-              return expiryTime > Date.now();
-            } catch (error) {
-              console.error('Error checking expiry:', error);
-              return false;
-            }
-          })
-        );
-      }, 60000);
-
-      return () => clearInterval(interval);
+      // アイテムのリアルタイム同期
+      const itemsRef = ref(db, 'items');
+      const unsubscribeItems = onValue(itemsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const itemsArray = Object.entries(data).map(([key, value]) => ({
+            ...value,
+            id: key
+          }));
+          setItems(itemsArray);
+        } else {
+          setItems([]);
+        }
+      });
+  
+      // ユーザーのリアルタイム同期
+      const contributorsRef = ref(db, 'contributors');
+      const unsubscribeContributors = onValue(contributorsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          setContributors(Object.values(data));
+        } else {
+          setContributors(['ユーザー1', 'ユーザー2', 'ユーザー3', 'ユーザー4', 'ユーザー5']);
+        }
+      });
+  
+      return () => {
+        unsubscribeItems();
+        unsubscribeContributors();
+      };
     } catch (error) {
       console.error('Error in useEffect:', error);
     }
-  }, [items, contributors]);
+  }, []); // 依存配列を空に
 
   const getJapanDateTime = () => {
     try {
@@ -277,19 +303,14 @@ const TikTokItemManager = () => {
 
   const addItem = (newItemData) => {
     try {
-      const now = new Date(newItemData.acquisitionTime);
-      const adjustedTime = now;
-      const expiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
-  
-      const newItem = {
-        id: Date.now(),
+      const itemsRef = ref(db, 'items');
+      push(itemsRef, {
         contributor: newItemData.contributor,
         item: newItemData.item,
-        acquisitionTime: adjustedTime.toISOString(),
-        expiryTime: expiryTime.toISOString(),
-      };
-  
-      setItems(prevItems => [...prevItems, newItem]);
+        acquisitionTime: newItemData.acquisitionTime,
+        expiryTime: new Date(new Date(newItemData.acquisitionTime).getTime() + 120 * 60 * 60 * 1000).toISOString(),
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       console.error('Error adding item:', error);
     }
@@ -297,24 +318,19 @@ const TikTokItemManager = () => {
 
   const updateItem = (id, field, value) => {
     try {
-      setItems(prevItems => prevItems.map(item => {
-        if (item.id === id) {
-          const updatedItem = { ...item, [field]: value };
-          
-          if (field === 'acquisitionTime') {
-            const inputDate = new Date(value);
-            // 入力値をそのまま日本時間として扱う
-            const adjustedTime = new Date(inputDate.getTime());
-            const newExpiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
-            
-            updatedItem.acquisitionTime = adjustedTime.toISOString();
-            updatedItem.expiryTime = newExpiryTime.toISOString();
-          }
-          
-          return updatedItem;
-        }
-        return item;
-      }));
+      const itemRef = ref(db, `items/${id}`);
+      const updates = {};
+      
+      if (field === 'acquisitionTime') {
+        const inputDate = new Date(value);
+        const newExpiryTime = new Date(inputDate.getTime() + 120 * 60 * 60 * 1000);
+        updates[field] = inputDate.toISOString();
+        updates.expiryTime = newExpiryTime.toISOString();
+      } else {
+        updates[field] = value;
+      }
+      
+      update(itemRef, updates);
     } catch (error) {
       console.error('Error updating item:', error);
     }
