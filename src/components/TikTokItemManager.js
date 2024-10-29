@@ -4,39 +4,12 @@ import { Trash2, Clock, Gift, UserPlus, Users, X, Edit2, Check } from 'lucide-re
 const ITEMS = ['🥊', '☁️', '⏰️', '⚒️'];
 const JST_OFFSET_MINUTES = 9 * 60;
 
-  // ここに以下のコードを追加
-  const [selectedItems, setSelectedItems] = useState([]);
-
-  const [isItemAddModalOpen, setIsItemAddModalOpen] = useState(false);
-
-  const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) => {
+// ContributorModalコンポーネント
+const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) => {
   const [newContributor, setNewContributor] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState('');
-  };
 
-  const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
-    const [newItem, setNewItem] = useState(() => {
-      const now = new Date();
-      const jstTime = new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60000);
-      return {
-        contributor: contributors[0],
-        item: ITEMS[0],
-        acquisitionTime: jstTime.toISOString().slice(0, 16)
-      };
-    });
-
-    const TikTokItemManager = () => {
-      const [items, setItems] = useState(() => {
-        try {
-          const savedItems = localStorage.getItem('tiktokItems');
-          return savedItems ? JSON.parse(savedItems) : [];
-        } catch (error) {
-          console.error('Error loading items:', error);
-          return [];
-        }
-      });
-      
   if (!isOpen) return null;
 
   const handleAdd = () => {
@@ -46,80 +19,6 @@ const JST_OFFSET_MINUTES = 9 * 60;
     }
   };
 
-  if (!isOpen) return null;
-
-  const handleAdd = () => {
-    addItem(newItem);
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">アイテム追加</h2>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block mb-2">ユーザー</label>
-            <select
-              value={newItem.contributor}
-              onChange={(e) => setNewItem({...newItem, contributor: e.target.value})}
-              className="w-full p-2 border rounded"
-            >
-              {contributors.map(contributor => (
-                <option key={contributor} value={contributor}>
-                  {contributor}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-2">アイテム</label>
-            <select
-              value={newItem.item}
-              onChange={(e) => setNewItem({...newItem, item: e.target.value})}
-              className="w-full p-2 border rounded"
-            >
-              {ITEMS.map(itemOption => (
-                <option key={itemOption} value={itemOption}>
-                  {itemOption}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-2">取得日時</label>
-            <input
-              type="datetime-local"
-              value={newItem.acquisitionTime}
-              onChange={(e) => setNewItem({...newItem, acquisitionTime: e.target.value})}
-              className="w-full p-2 border rounded"
-              step="60"
-            />
-          </div>
-
-          <button
-            onClick={handleAdd}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            <Gift className="w-4 h-4" />
-            追加
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
   const handleDelete = (contributor) => {
     setContributors(contributors.filter(c => c !== contributor));
   };
@@ -212,6 +111,108 @@ const JST_OFFSET_MINUTES = 9 * 60;
   );
 };
 
+// ItemAddModalコンポーネント
+const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
+  const [newItem, setNewItem] = useState(() => {
+    const now = new Date();
+    const jstTime = new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60000);
+    return {
+      contributor: contributors[0],
+      item: ITEMS[0],
+      acquisitionTime: jstTime.toISOString().slice(0, 16)
+    };
+  });
+
+  if (!isOpen) return null;
+
+  const handleAdd = () => {
+    addItem(newItem);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">アイテム追加</h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-2">ユーザー</label>
+            <select
+              value={newItem.contributor}
+              onChange={(e) => setNewItem({...newItem, contributor: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              {contributors.map(contributor => (
+                <option key={contributor} value={contributor}>
+                  {contributor}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2">アイテム</label>
+            <select
+              value={newItem.item}
+              onChange={(e) => setNewItem({...newItem, item: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              {ITEMS.map(itemOption => (
+                <option key={itemOption} value={itemOption}>
+                  {itemOption}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2">取得日時</label>
+            <input
+              type="datetime-local"
+              value={newItem.acquisitionTime}
+              onChange={(e) => setNewItem({...newItem, acquisitionTime: e.target.value})}
+              className="w-full p-2 border rounded"
+              step="60"
+            />
+          </div>
+
+          <button
+            onClick={handleAdd}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            <Gift className="w-4 h-4" />
+            追加
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+// メインのTikTokItemManagerコンポーネント
+const TikTokItemManager = () => {
+  const [items, setItems] = useState(() => {
+    try {
+      const savedItems = localStorage.getItem('tiktokItems');
+      return savedItems ? JSON.parse(savedItems) : [];
+    } catch (error) {
+      console.error('Error loading items:', error);
+      return [];
+    }
+  });
+
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [isItemAddModalOpen, setIsItemAddModalOpen] = useState(false);
+  const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
+
   const [contributors, setContributors] = useState(() => {
     try {
       const savedContributors = localStorage.getItem('tiktokContributors');
@@ -227,8 +228,6 @@ const JST_OFFSET_MINUTES = 9 * 60;
       return ['ユーザー1', 'ユーザー2', 'ユーザー3', 'ユーザー4', 'ユーザー5'];
     }
   });
-
-  const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -274,7 +273,7 @@ const JST_OFFSET_MINUTES = 9 * 60;
       const totalOffset = userOffset + JST_OFFSET_MINUTES;
       const adjustedTime = new Date(inputDate.getTime() + totalOffset * 60000);
       const expiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
-  
+
       const newItem = {
         id: Date.now(),
         contributor: newItemData.contributor,
@@ -282,18 +281,10 @@ const JST_OFFSET_MINUTES = 9 * 60;
         acquisitionTime: adjustedTime.toISOString(),
         expiryTime: expiryTime.toISOString(),
       };
-  
+
       setItems(prevItems => [...prevItems, newItem]);
     } catch (error) {
       console.error('Error adding item:', error);
-    }
-  };
-
-  const deleteItem = (id) => {
-    try {
-      setItems(prevItems => prevItems.filter(item => item.id !== id));
-    } catch (error) {
-      console.error('Error deleting item:', error);
     }
   };
 
@@ -327,17 +318,16 @@ const JST_OFFSET_MINUTES = 9 * 60;
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) throw new Error('Invalid date');
-  
+
       const pad = (num) => String(num).padStart(2, '0');
       
-      const year = date.getFullYear();
       const month = pad(date.getMonth() + 1);
       const day = pad(date.getDate());
       const hours = pad(date.getHours());
       const minutes = pad(date.getMinutes());
       
       return {
-        date: `${month}/${day}`,  // 年を削除
+        date: `${month}/${day}`,
         time: `${hours}:${minutes}`
       };
     } catch (error) {
@@ -375,123 +365,135 @@ const JST_OFFSET_MINUTES = 9 * 60;
       return '計算エラー';
     }
   };
-
   return (
     <div className="p-4 space-y-4">
-    <div className="flex justify-between items-center">
-  <h1 className="text-2xl font-bold">TikTok ライブバトルアイテム管理</h1>
-  <div className="flex gap-2">
-    <button 
-      onClick={() => setContributorModalOpen(true)} 
-      className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-    >
-      <Users className="w-4 h-4" />
-      ユーザー管理
-    </button>
-    <button 
-      onClick={() => setIsItemAddModalOpen(true)}
-      className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-    >
-      <Gift className="w-4 h-4" />
-      アイテム追加
-    </button>
-    <button 
-      onClick={() => {
-        if (selectedItems.length > 0) {
-          if (window.confirm('選択したアイテムを削除しますか？')) {
-            setItems(prevItems => prevItems.filter(item => !selectedItems.includes(item.id)));
-            setSelectedItems([]);
-          }
-        }
-      }}
-      className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-    >
-      <Trash2 className="w-4 h-4" />
-      アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
-    </button>
-  </div>
-</div>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">TikTok ライブバトルアイテム管理</h1>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setIsContributorModalOpen(true)} 
+            className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            <Users className="w-4 h-4" />
+            ユーザー管理
+          </button>
+          <button 
+            onClick={() => setIsItemAddModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            <Gift className="w-4 h-4" />
+            アイテム追加
+          </button>
+          <button 
+            onClick={() => {
+              if (selectedItems.length > 0) {
+                if (window.confirm('選択したアイテムを削除しますか？')) {
+                  setItems(prevItems => prevItems.filter(item => !selectedItems.includes(item.id)));
+                  setSelectedItems([]);
+                }
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            <Trash2 className="w-4 h-4" />
+            アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
+          </button>
+        </div>
+      </div>
 
       <div className="overflow-x-auto">
-      <table className="min-w-full bg-white border border-gray-200">
-      <thead className="bg-gray-50">
-  <tr>
-    <th className="px-4 py-2 text-center border-b whitespace-nowrap">
-      <input
-        type="checkbox"
-        checked={items.length > 0 && selectedItems.length === items.length}
-        onChange={(e) => {
-          if (e.target.checked) {
-            setSelectedItems(items.map(item => item.id));
-          } else {
-            setSelectedItems([]);
-          }
-        }}
-        className="w-4 h-4"
-      />
-    </th>
-    <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
-    <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
-    <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
-    <th className="px-4 py-2 text-center border-b whitespace-nowrap">使用期限</th>
-    <th className="px-4 py-2 text-center border-b whitespace-nowrap">取得日時</th>
-  </tr>
-</thead>
-<tbody>
-    {items.map(item => (
-    <tr key={item.id} className="hover:bg-gray-50">
-    <td className="px-4 py-2 border-b text-center">
-      <input
-        type="checkbox"
-        checked={selectedItems.includes(item.id)}
-        onChange={(e) => {
-          if (e.target.checked) {
-            setSelectedItems([...selectedItems, item.id]);
-          } else {
-            setSelectedItems(selectedItems.filter(id => id !== item.id));
-          }
-        }}
-        className="w-4 h-4"
-      />
-    </td>
-        <td className="px-4 py-2 border-b">
-          <select
-            value={item.item}
-            onChange={(e) => updateItem(item.id, 'item', e.target.value)}
-            className="w-20 p-2 border rounded"
-          >
-            {ITEMS.map(itemOption => (
-              <option key={itemOption} value={itemOption}>
-                {itemOption}
-              </option>
+        <table className="min-w-full bg-white border border-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">
+                <input
+                  type="checkbox"
+                  checked={items.length > 0 && selectedItems.length === items.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedItems(items.map(item => item.id));
+                    } else {
+                      setSelectedItems([]);
+                    }
+                  }}
+                  className="w-4 h-4"
+                />
+              </th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">使用期限</th>
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">取得日時</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(item => (
+              <tr key={item.id} className="hover:bg-gray-50">
+                <td className="px-4 py-2 border-b text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(item.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedItems([...selectedItems, item.id]);
+                      } else {
+                        setSelectedItems(selectedItems.filter(id => id !== item.id));
+                      }
+                    }}
+                    className="w-4 h-4"
+                  />
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <select
+                    value={item.contributor}
+                    onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
+                    className="w-32 p-2 border rounded"
+                  >
+                    {contributors.map(contributor => (
+                      <option key={contributor} value={contributor}>
+                        {contributor}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <select
+                    value={item.item}
+                    onChange={(e) => updateItem(item.id, 'item', e.target.value)}
+                    className="w-20 p-2 border rounded"
+                  >
+                    {ITEMS.map(itemOption => (
+                      <option key={itemOption} value={itemOption}>
+                        {itemOption}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <div className="flex items-center gap-1 whitespace-nowrap">
+                    <Clock className="w-4 h-4 shrink-0" />
+                    {getRemainingTime(item.expiryTime)}
+                  </div>
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <div className="flex flex-col items-center text-center min-w-[120px]">
+                    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
+                    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
+                  </div>
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <input
+                    type="datetime-local"
+                    value={formatInputDateTime(item.acquisitionTime)}
+                    onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+                    className="p-2 border rounded text-center w-full"
+                    step="60"
+                  />
+                </td>
+              </tr>
             ))}
-          </select>
-        </td>
-        <td className="px-4 py-2 border-b">
-        <div className="flex items-center gap-1 whitespace-nowrap">
-          <Clock className="w-4 h-4 shrink-0" />
-          {getRemainingTime(item.expiryTime)}
-        </div>
-      </td>
-      <td className="px-4 py-2 border-b">
-  <div className="flex flex-col items-center text-center min-w-[120px]">
-    <div className="whitespace-nowrap">{formatDateTime(item.acquisitionTime).date}</div>
-    <div className="whitespace-nowrap">{formatDateTime(item.acquisitionTime).time}</div>
-  </div>
-</td>
-      <td className="px-4 py-2 border-b">
-        <input
-          type="datetime-local"
-          value={formatInputDateTime(item.acquisitionTime)}
-          onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-          className="p-2 border rounded text-center w-full"
-          step="60"
-        />
-      </td>
-    </tr>
-  ))}
-</tbody>        
-</table>  
+          </tbody>
+        </table>
       </div>
 
       <ContributorModal
@@ -501,13 +503,13 @@ const JST_OFFSET_MINUTES = 9 * 60;
         setContributors={setContributors}
       />
       <ItemAddModal
-  isOpen={isItemAddModalOpen}
-  onClose={() => setIsItemAddModalOpen(false)}
-  contributors={contributors}
-  addItem={addItem}
-/>
+        isOpen={isItemAddModalOpen}
+        onClose={() => setIsItemAddModalOpen(false)}
+        contributors={contributors}
+        addItem={addItem}
+      />
     </div>
   );
 };
 
-export default TikTokItemManager;
+export default TikTokItemManager;  
