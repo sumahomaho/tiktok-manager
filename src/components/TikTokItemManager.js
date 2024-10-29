@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Clock, Gift, UserPlus, Users, X, Edit2, Check } from 'lucide-react';
+import { Trash2, Gift, UserPlus, Users, X, Edit2, Check } from 'lucide-react';
 
 const ITEMS = ['🥊', '☁️', '⏰️', '⚒️'];
 const JST_OFFSET_MINUTES = 9 * 60;
@@ -341,14 +341,25 @@ const TikTokItemManager = () => {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) throw new Error('Invalid date');
       
-      const userOffset = date.getTimezoneOffset();
-      const adjustedDate = new Date(date.getTime() - userOffset * 60000);
-      return adjustedDate.toISOString().slice(0, 16);
+      // 日本時間に変換
+      const jstDate = new Date(date.getTime() + (9 * 60 * 60000));
+      return jstDate.toISOString().slice(0, 16);
     } catch (error) {
       console.error('Error formatting input date:', error);
       return '';
     }
   };
+  
+  // および、updateItem関数内の時間調整部分を修正
+  if (field === 'acquisitionTime') {
+    const inputDate = new Date(value);
+    // 入力値をそのまま日本時間として扱う
+    const adjustedTime = new Date(inputDate.getTime());
+    const newExpiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
+    
+    updatedItem.acquisitionTime = adjustedTime.toISOString();
+    updatedItem.expiryTime = newExpiryTime.toISOString();
+  }  
 
   const getRemainingTime = (expiryTime) => {
     try {
@@ -470,11 +481,10 @@ const TikTokItemManager = () => {
                   </select>
                 </td>
                 <td className="px-4 py-2 border-b">
-                  <div className="flex items-center gap-1 whitespace-nowrap">
-                    <Clock className="w-4 h-4 shrink-0" />
-                    {getRemainingTime(item.expiryTime)}
-                  </div>
-                </td>
+  <div className="flex items-center gap-1 whitespace-nowrap">
+    {getRemainingTime(item.expiryTime)}
+  </div>
+</td>  
                 <td className="px-4 py-2 border-b">
                   <div className="flex flex-col items-center text-center min-w-[120px]">
                     <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
