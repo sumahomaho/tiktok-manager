@@ -6,6 +6,22 @@ const ITEMS = ['🥊', '☁️', '⏰️', '⚒️'];
 // 日本時間のオフセット（分）
 const JST_OFFSET_MINUTES = 9 * 60;
 
+const TikTokItemManager = () => {
+  const [items, setItems] = useState(() => {
+    try {
+      const savedItems = localStorage.getItem('tiktokItems');
+      return savedItems ? JSON.parse(savedItems) : [];
+    } catch (error) {
+      console.error('Error loading items:', error);
+      return [];
+    }
+  });
+
+  // ここに以下のコードを追加
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const [isItemAddModalOpen, setIsItemAddModalOpen] = useState(false);
+
 const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) => {
   const [newContributor, setNewContributor] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -284,7 +300,7 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
   <h1 className="text-2xl font-bold">TikTok ライブバトルアイテム管理</h1>
   <div className="flex gap-2">
     <button 
-      onClick={() => setIsContributorModalOpen(true)} 
+      onClick={() => setContributorModalOpen(true)} 
       className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
     >
       <Users className="w-4 h-4" />
@@ -297,19 +313,20 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
       <Gift className="w-4 h-4" />
       アイテム追加
     </button>
-    {items.length > 0 && (
     <button 
-    onClick={() => {
-      if (window.confirm('全てのアイテムを削除しますか？')) {
-        setItems([]);
-      }
-    }}
-    className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-  >
-    <Trash2 className="w-4 h-4" />
-    全削除
-  </button>  
-    )}
+      onClick={() => {
+        if (selectedItems.length > 0) {
+          if (window.confirm('選択したアイテムを削除しますか？')) {
+            setItems(prevItems => prevItems.filter(item => !selectedItems.includes(item.id)));
+            setSelectedItems([]);
+          }
+        }
+      }}
+      className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+    >
+      <Trash2 className="w-4 h-4" />
+      アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
+    </button>
   </div>
 </div>
 
@@ -317,6 +334,20 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
       <table className="min-w-full bg-white border border-gray-200">
       <thead className="bg-gray-50">
   <tr>
+    <th className="px-4 py-2 text-center border-b whitespace-nowrap">
+      <input
+        type="checkbox"
+        checked={items.length > 0 && selectedItems.length === items.length}
+        onChange={(e) => {
+          if (e.target.checked) {
+            setSelectedItems(items.map(item => item.id));
+          } else {
+            setSelectedItems([]);
+          }
+        }}
+        className="w-4 h-4"
+      />
+    </th>
     <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
     <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
     <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
@@ -327,19 +358,20 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
 <tbody>
     {items.map(item => (
     <tr key={item.id} className="hover:bg-gray-50">
-        <td className="px-4 py-2 border-b">
-          <select
-            value={item.contributor}
-            onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
-            className="w-32 p-2 border rounded"
-          >
-            {contributors.map(contributor => (
-              <option key={contributor} value={contributor}>
-                {contributor}
-              </option>
-            ))}
-          </select>
-        </td>
+    <td className="px-4 py-2 border-b text-center">
+      <input
+        type="checkbox"
+        checked={selectedItems.includes(item.id)}
+        onChange={(e) => {
+          if (e.target.checked) {
+            setSelectedItems([...selectedItems, item.id]);
+          } else {
+            setSelectedItems(selectedItems.filter(id => id !== item.id));
+          }
+        }}
+        className="w-4 h-4"
+      />
+    </td>
         <td className="px-4 py-2 border-b">
           <select
             value={item.item}
