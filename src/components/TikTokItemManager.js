@@ -115,11 +115,11 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
 const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
   const [newItem, setNewItem] = useState(() => {
     const now = new Date();
-    const jstTime = new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60000);
+    // 現在時刻をそのまま日本時間として扱う
     return {
       contributor: contributors[0],
       item: ITEMS[0],
-      acquisitionTime: jstTime.toISOString().slice(0, 16)
+      acquisitionTime: now.toISOString().slice(0, 16)
     };
   });
 
@@ -269,11 +269,10 @@ const TikTokItemManager = () => {
   const addItem = (newItemData) => {
     try {
       const inputDate = new Date(newItemData.acquisitionTime);
-      const userOffset = inputDate.getTimezoneOffset();
-      const totalOffset = userOffset + JST_OFFSET_MINUTES;
-      const adjustedTime = new Date(inputDate.getTime() + totalOffset * 60000);
+      // 入力値をそのまま日本時間として扱う
+      const adjustedTime = new Date(inputDate.getTime());
       const expiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
-
+  
       const newItem = {
         id: Date.now(),
         contributor: newItemData.contributor,
@@ -281,7 +280,7 @@ const TikTokItemManager = () => {
         acquisitionTime: adjustedTime.toISOString(),
         expiryTime: expiryTime.toISOString(),
       };
-
+  
       setItems(prevItems => [...prevItems, newItem]);
     } catch (error) {
       console.error('Error adding item:', error);
