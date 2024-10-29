@@ -111,24 +111,25 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
   );
 };
 
-// ItemAddModalコンポーネント
 const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
   const [newItem, setNewItem] = useState(() => {
+    // 現在時刻を取得し、日本時間に変換
     const now = new Date();
-    // 現在時刻をそのまま日本時間として扱う
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    // 日本時間のISO文字列を作成
+    const jstTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+
     return {
       contributor: contributors[0],
       item: ITEMS[0],
-      acquisitionTime: now.toISOString().slice(0, 16)
+      acquisitionTime: jstTimeString
     };
   });
-
-  if (!isOpen) return null;
-
-  const handleAdd = () => {
-    addItem(newItem);
-    onClose();
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -268,9 +269,8 @@ const TikTokItemManager = () => {
 
   const addItem = (newItemData) => {
     try {
-      const inputDate = new Date(newItemData.acquisitionTime);
-      // 入力値をそのまま日本時間として扱う
-      const adjustedTime = new Date(inputDate.getTime());
+      const now = new Date(newItemData.acquisitionTime);
+      const adjustedTime = now;
       const expiryTime = new Date(adjustedTime.getTime() + 120 * 60 * 60 * 1000);
   
       const newItem = {
@@ -339,14 +339,18 @@ const TikTokItemManager = () => {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) throw new Error('Invalid date');
       
-      // 日本時間に変換
-      const jstDate = new Date(date.getTime() + (9 * 60 * 60000));
-      return jstDate.toISOString().slice(0, 16);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
     } catch (error) {
       console.error('Error formatting input date:', error);
       return '';
     }
-  }; 
+  };
 
   const getRemainingTime = (expiryTime) => {
     try {
