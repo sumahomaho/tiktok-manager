@@ -2,31 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { Trash2, Clock, Gift, UserPlus, Users, X, Edit2, Check } from 'lucide-react';
 
 const ITEMS = ['🥊', '☁️', '⏰️', '⚒️'];
-
-// 日本時間のオフセット（分）
 const JST_OFFSET_MINUTES = 9 * 60;
-
-const TikTokItemManager = () => {
-  const [items, setItems] = useState(() => {
-    try {
-      const savedItems = localStorage.getItem('tiktokItems');
-      return savedItems ? JSON.parse(savedItems) : [];
-    } catch (error) {
-      console.error('Error loading items:', error);
-      return [];
-    }
-  });
 
   // ここに以下のコードを追加
   const [selectedItems, setSelectedItems] = useState([]);
 
   const [isItemAddModalOpen, setIsItemAddModalOpen] = useState(false);
 
-const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) => {
+  const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) => {
   const [newContributor, setNewContributor] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState('');
+  };
 
+  const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
+    const [newItem, setNewItem] = useState(() => {
+      const now = new Date();
+      const jstTime = new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60000);
+      return {
+        contributor: contributors[0],
+        item: ITEMS[0],
+        acquisitionTime: jstTime.toISOString().slice(0, 16)
+      };
+    });
+
+    const TikTokItemManager = () => {
+      const [items, setItems] = useState(() => {
+        try {
+          const savedItems = localStorage.getItem('tiktokItems');
+          return savedItems ? JSON.parse(savedItems) : [];
+        } catch (error) {
+          console.error('Error loading items:', error);
+          return [];
+        }
+      });
+      
   if (!isOpen) return null;
 
   const handleAdd = () => {
@@ -35,17 +45,6 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
       setNewContributor('');
     }
   };
-// ContributorModalの後に以下のコードを追加
-const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
-  const [newItem, setNewItem] = useState(() => {
-    const now = new Date();
-    const jstTime = new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60000);
-    return {
-      contributor: contributors[0],
-      item: ITEMS[0],
-      acquisitionTime: jstTime.toISOString().slice(0, 16)
-    };
-  });
 
   if (!isOpen) return null;
 
