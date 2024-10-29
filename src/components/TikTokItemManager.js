@@ -131,6 +131,14 @@ const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
     };
   });
 
+  if (!isOpen) return null;  // この行を追加
+
+  // この handleAdd 関数を追加
+  const handleAdd = () => {
+    addItem(newItem);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
