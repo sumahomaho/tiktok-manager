@@ -203,6 +203,8 @@ const TikTokItemManager = () => {
     }
   });
 
+  const [isItemAddModalOpen, setIsItemAddModalOpen] = useState(false);
+
   const [contributors, setContributors] = useState(() => {
     try {
       const savedContributors = localStorage.getItem('tiktokContributors');
@@ -390,71 +392,86 @@ const TikTokItemManager = () => {
 </div>  
 
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left border-b">ユーザー</th>
-              <th className="px-4 py-2 text-left border-b">アイテム</th>
-              <th className="px-4 py-2 text-left border-b">残り時間</th>
-              <th className="px-4 py-2 text-left border-b">使用期限</th>
-              <th className="px-4 py-2 text-left border-b">取得日時</th>
-              <th className="px-4 py-2 text-left border-b">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(item => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border-b">
-                  <select
-                    value={item.contributor}
-                    onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
-                    className="w-32 p-2 border rounded"
-                  >
-                    {contributors.map(contributor => (
-                      <option key={contributor} value={contributor}>
-                        {contributor}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-2 border-b">
-                  <select
-                    value={item.item}
-                    onChange={(e) => updateItem(item.id, 'item', e.target.value)}
-                    className="w-20 p-2 border rounded"
-                  >
-                    {ITEMS.map(itemOption => (
-                      <option key={itemOption} value={itemOption}>
-                        {itemOption}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-2 border-b">
-  <div className="flex flex-col items-center text-center min-w-[120px]">
-    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
-    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
-  </div>
-</td>
-<td className="px-4 py-2 border-b">
-  <div className="flex flex-col items-center text-center min-w-[120px]">
-    <input
-      type="datetime-local"
-      value={formatInputDateTime(item.acquisitionTime)}
-      onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-      className="p-2 border rounded text-center w-full"
-      step="60"
-    />
-    <div className="whitespace-nowrap mt-1">
-      <div>{formatDateTime(item.acquisitionTime).date}</div>
-      <div>{formatDateTime(item.acquisitionTime).time}</div>
-    </div>
-  </div>
-</td>  
-              </tr>
+      <table className="min-w-full bg-white border border-gray-200">
+  <thead className="bg-gray-50">
+    <tr>
+      <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
+      <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
+      <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
+      <th className="px-4 py-2 text-center border-b whitespace-nowrap">使用期限</th>
+      <th className="px-4 py-2 text-center border-b whitespace-nowrap">取得日時</th>
+      <th className="px-4 py-2 text-left border-b whitespace-nowrap">操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {items.map(item => (
+      <tr key={item.id} className="hover:bg-gray-50">
+        <td className="px-4 py-2 border-b">
+          <select
+            value={item.contributor}
+            onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
+            className="w-32 p-2 border rounded"
+          >
+            {contributors.map(contributor => (
+              <option key={contributor} value={contributor}>
+                {contributor}
+              </option>
             ))}
-          </tbody>
-        </table>
+          </select>
+        </td>
+        <td className="px-4 py-2 border-b">
+          <select
+            value={item.item}
+            onChange={(e) => updateItem(item.id, 'item', e.target.value)}
+            className="w-20 p-2 border rounded"
+          >
+            {ITEMS.map(itemOption => (
+              <option key={itemOption} value={itemOption}>
+                {itemOption}
+              </option>
+            ))}
+          </select>
+        </td>
+        <td className="px-4 py-2 border-b">
+          <div className="flex items-center gap-1 whitespace-nowrap">
+            <Clock className="w-4 h-4 shrink-0" />
+            {getRemainingTime(item.expiryTime)}
+          </div>
+        </td>
+        <td className="px-4 py-2 border-b">
+          <div className="flex flex-col items-center text-center min-w-[120px]">
+            <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
+            <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
+          </div>
+        </td>
+        <td className="px-4 py-2 border-b">
+          <div className="flex flex-col items-center text-center min-w-[120px]">
+            <input
+              type="datetime-local"
+              value={formatInputDateTime(item.acquisitionTime)}
+              onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+              className="p-2 border rounded text-center w-full"
+              step="60"
+            />
+            <div className="whitespace-nowrap mt-1">
+              <div>{formatDateTime(item.acquisitionTime).date}</div>
+              <div>{formatDateTime(item.acquisitionTime).time}</div>
+            </div>
+          </div>
+        </td>
+        <td className="px-4 py-2 border-b">
+          <button
+            onClick={() => deleteItem(item.id)}
+            className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            <Trash2 className="w-4 h-4" />
+            削除
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>  
       </div>
 
       <ContributorModal
