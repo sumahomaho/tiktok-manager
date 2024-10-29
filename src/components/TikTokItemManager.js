@@ -128,8 +128,6 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
   );
 };
 
-  const [isItemAddModalOpen, setIsItemAddModalOpen] = useState(false);
-
   const [contributors, setContributors] = useState(() => {
     try {
       const savedContributors = localStorage.getItem('tiktokContributors');
