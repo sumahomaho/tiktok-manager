@@ -50,7 +50,7 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">ユーザー管理</h2>
@@ -152,7 +152,7 @@ const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">アイテム追加</h2>
@@ -354,19 +354,17 @@ const TikTokItemManager = () => {
   };
 
   const getRemainingTime = (expiryTime) => {
-    try {
-      const remaining = new Date(expiryTime).getTime() - Date.now();
-      if (remaining <= 0) return '期限切れ';
-      
-      const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      
-      return `${days}日${hours}時間${minutes}分`;
-    } catch (error) {
-      console.error('Error calculating remaining time:', error);
-      return '計算エラー';
-    }
+    const remaining = new Date(expiryTime).getTime() - Date.now();
+    if (remaining <= 0) return { days: '期限', time: '切れ' };
+    
+    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return {
+      days: `${days}日`,
+      time: `${hours}時間${minutes}分`
+    };
   };
   return (
     <div className="p-4 space-y-4">
@@ -456,17 +454,18 @@ const TikTokItemManager = () => {
                   />
                 </td>
                 <td className="px-4 py-2 border-b">
-                  <select
-                    value={item.contributor}
-                    onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
-                    className="w-32 p-2 border rounded"
-                  >
-                    {contributors.map(contributor => (
-                      <option key={contributor} value={contributor}>
-                        {contributor}
-                      </option>
-                    ))}
-                  </select>
+                <select
+  value={item.contributor}
+  onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
+  className="w-full p-1 border rounded text-sm truncate"
+  style={{ maxWidth: '120px' }}
+>
+  {contributors.map(contributor => (
+    <option key={contributor} value={contributor}>
+      {contributor.length > 10 ? `${contributor.slice(0, 10)}...` : contributor}
+    </option>
+  ))}
+</select> 
                 </td>
                 <td className="px-4 py-2 border-b">
                   <select
@@ -481,11 +480,12 @@ const TikTokItemManager = () => {
                     ))}
                   </select>
                 </td>
-                <td className="px-4 py-2 border-b">
-  <div className="flex items-center gap-1 whitespace-nowrap">
-    {getRemainingTime(item.expiryTime)}
+                <td className="p-2 border">
+  <div className="flex flex-col items-center text-sm">
+    <div className="whitespace-nowrap">{getRemainingTime(item.expiryTime).days}</div>
+    <div className="whitespace-nowrap">{getRemainingTime(item.expiryTime).time}</div>
   </div>
-</td>  
+</td>    
                 <td className="px-4 py-2 border-b">
                   <div className="flex flex-col items-center text-center min-w-[120px]">
                     <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
@@ -493,13 +493,14 @@ const TikTokItemManager = () => {
                   </div>
                 </td>
                 <td className="px-4 py-2 border-b">
-                  <input
-                    type="datetime-local"
-                    value={formatInputDateTime(item.acquisitionTime)}
-                    onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-                    className="p-2 border rounded text-center w-full"
-                    step="60"
-                  />
+              <input
+  type="datetime-local"
+  value={formatInputDateTime(item.acquisitionTime)}
+  onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+  className="w-full p-1 border rounded text-sm"
+  style={{ maxWidth: '150px' }}
+  step="60"
+/>    
                 </td>
               </tr>
             ))}
