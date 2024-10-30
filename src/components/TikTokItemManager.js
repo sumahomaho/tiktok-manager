@@ -355,16 +355,13 @@ const TikTokItemManager = () => {
 
   const getRemainingTime = (expiryTime) => {
     const remaining = new Date(expiryTime).getTime() - Date.now();
-    if (remaining <= 0) return { days: '期限', time: '切れ' };
+    if (remaining <= 0) return '期限切れ';
     
     const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
     const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     
-    return {
-      days: `${days}日`,
-      time: `${hours}時間${minutes}分`
-    };
+    return `${days}日${hours}時間${minutes}分`;
   };
   return (
     <div className="p-4 space-y-4">
@@ -484,12 +481,11 @@ const TikTokItemManager = () => {
                     ))}
                   </select>
                 </td>
-                <td className="p-2 border">
-  <div className="flex flex-col items-center text-sm">
-    <div className="whitespace-nowrap">{getRemainingTime(item.expiryTime).days}</div>
-    <div className="whitespace-nowrap">{getRemainingTime(item.expiryTime).time}</div>
+                <td className="px-4 py-2 border-b">
+  <div className="flex items-center gap-1 whitespace-nowrap">
+    {getRemainingTime(item.expiryTime)}
   </div>
-</td>    
+</td> 
 <td className="px-4 py-2 border-b">
   <div className="flex flex-col gap-1">
     <input
