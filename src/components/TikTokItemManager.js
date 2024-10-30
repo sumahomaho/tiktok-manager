@@ -411,9 +411,8 @@ const TikTokItemManager = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto -mx-4 sm:-mx-0">
-  <div className="inline-block min-w-full align-middle">
-    <table className="min-w-full divide-y divide-gray-200 table-fixed">
+      <div className="w-full overflow-x-auto">
+  <table className="w-full min-w-[800px] bg-white border border-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-2 text-center border-b whitespace-nowrap">
