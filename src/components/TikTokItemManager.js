@@ -408,20 +408,32 @@ const TikTokItemManager = () => {
             <Gift className="w-4 h-4" />
             アイテム追加
           </button>
-          <button 
-            onClick={() => {
-              if (selectedItems.length > 0) {
-                if (window.confirm('選択したアイテムを削除しますか？')) {
-                  setItems(prevItems => prevItems.filter(item => !selectedItems.includes(item.id)));
-                  setSelectedItems([]);
-                }
-              }
-            }}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            <Trash2 className="w-4 h-4" />
-            アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
-          </button>
+          // 削除ボタンのコードを以下のように修正
+<button 
+  onClick={() => {
+    if (selectedItems.length > 0) {
+      // 確認ダイアログを表示する前に状態をチェック
+      const itemsToDelete = selectedItems.length;
+      if (window.confirm(`選択した${itemsToDelete}個のアイテムを削除しますか？`)) {
+        try {
+          // バッチ処理として一括で削除
+          const updates = {};
+          selectedItems.forEach(id => {
+            updates[`items/${id}`] = null;
+          });
+          update(ref(db), updates);
+          setSelectedItems([]);
+        } catch (error) {
+          console.error('Error deleting items:', error);
+        }
+      }
+    }
+  }}
+  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+>
+  <Trash2 className="w-4 h-4" />
+  アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
+</button>
         </div>
       </div>
 
