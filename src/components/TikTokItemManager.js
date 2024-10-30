@@ -366,7 +366,7 @@ const TikTokItemManager = () => {
   return (
     <div className="p-4 space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">TikTok ライブバトルアイテム管理</h1>
+        <h1 className="text-2xl font-bold">TikTokアイテム管理</h1>
         <div className="flex gap-2">
           <button 
             onClick={() => setIsContributorModalOpen(true)} 
