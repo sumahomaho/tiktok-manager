@@ -16,26 +16,24 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
 
   const handleAdd = () => {
     if (newContributor.trim() && !contributors.includes(newContributor.trim())) {
-      setContributors([...contributors, newContributor.trim()]);
+      const contributorRef = ref(db, 'contributors');
+      const updatedContributors = [...contributors, newContributor.trim()];
+      set(contributorRef, updatedContributors);
       setNewContributor('');
     }
   };
 
-  const handleDeleteSelected = () => {
-    if (selectedItems.length > 0) {
-      if (window.confirm('選択したアイテムを削除しますか？')) {
-        try {
-          selectedItems.forEach(id => {
-            const itemRef = ref(db, `items/${id}`);
-            set(itemRef, null);
-          });
-          setSelectedItems([]);
-        } catch (error) {
-          console.error('Error deleting items:', error);
-        }
-      }
+  const handleDelete = (contributor) => {
+    try {
+      const contributorRef = ref(db, 'contributors');
+      const updatedContributors = contributors.filter(c => c !== contributor);
+      set(contributorRef, updatedContributors);
+    } catch (error) {
+      console.error('Error deleting contributor:', error);
     }
   };
+
+  // ... 残りのコード（変更なし）
 
   const startEditing = (contributor) => {
     setEditingId(contributor);
