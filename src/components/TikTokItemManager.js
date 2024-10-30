@@ -413,12 +413,11 @@ const TikTokItemManager = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto -mx-4 sm:mx-0">
-  <div className="inline-block min-w-full align-middle">
-    <table className="min-w-full divide-y divide-gray-200 table-fixed">    
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200">
           <thead className="bg-gray-50">
             <tr>
-            <th className="w-10 px-2 py-2 text-center border-b whitespace-nowrap">
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">
                 <input
                   type="checkbox"
                   checked={items.length > 0 && selectedItems.length === items.length}
@@ -432,11 +431,11 @@ const TikTokItemManager = () => {
                   className="w-4 h-4"
                 />
               </th>
-              <th className="w-28 px-2 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
-    <th className="w-16 px-2 py-2 text-left border-b whitespace-nowrap">アイテム</th>
-    <th className="w-24 px-2 py-2 text-left border-b whitespace-nowrap">残り時間</th>
-    <th className="w-24 px-2 py-2 text-center border-b whitespace-nowrap">使用期限</th>
-    <th className="w-32 px-2 py-2 text-center border-b whitespace-nowrap">取得日時</th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">使用期限</th>
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">取得日時</th>
             </tr>
           </thead>
           <tbody>
@@ -456,12 +455,12 @@ const TikTokItemManager = () => {
                     className="w-4 h-4"
                   />
                 </td>
-                <td className="px-2 py-2 border-b">
-  <select
-    value={item.contributor}
-    onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
-    className="w-full p-1 border rounded text-sm"
-  >
+                <td className="px-4 py-2 border-b">
+                  <select
+                    value={item.contributor}
+                    onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
+                    className="w-32 p-2 border rounded"
+                  >
                     {contributors.map(contributor => (
                       <option key={contributor} value={contributor}>
                         {contributor}
@@ -494,13 +493,13 @@ const TikTokItemManager = () => {
                   </div>
                 </td>
                 <td className="px-4 py-2 border-b">
-                <input
-  type="datetime-local"
-  value={formatInputDateTime(item.acquisitionTime)}
-  onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-  className="p-1 border rounded text-center w-full text-sm"
-  step="60"
-/>
+                  <input
+                    type="datetime-local"
+                    value={formatInputDateTime(item.acquisitionTime)}
+                    onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+                    className="p-2 border rounded text-center w-full"
+                    step="60"
+                  />
                 </td>
               </tr>
             ))}
