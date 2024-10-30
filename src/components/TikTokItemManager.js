@@ -16,24 +16,26 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
 
   const handleAdd = () => {
     if (newContributor.trim() && !contributors.includes(newContributor.trim())) {
-      const contributorRef = ref(db, 'contributors');
-      const updatedContributors = [...contributors, newContributor.trim()];
-      set(contributorRef, updatedContributors);
+      setContributors([...contributors, newContributor.trim()]);
       setNewContributor('');
     }
   };
 
-  const handleDelete = (contributor) => {
-    try {
-      const contributorRef = ref(db, 'contributors');
-      const updatedContributors = contributors.filter(c => c !== contributor);
-      set(contributorRef, updatedContributors);
-    } catch (error) {
-      console.error('Error deleting contributor:', error);
+  const handleDeleteSelected = () => {
+    if (selectedItems.length > 0) {
+      if (window.confirm('選択したアイテムを削除しますか？')) {
+        try {
+          selectedItems.forEach(id => {
+            const itemRef = ref(db, `items/${id}`);
+            set(itemRef, null);
+          });
+          setSelectedItems([]);
+        } catch (error) {
+          console.error('Error deleting items:', error);
+        }
+      }
     }
   };
-
-  // ... 残りのコード（変更なし）
 
   const startEditing = (contributor) => {
     setEditingId(contributor);
@@ -408,32 +410,20 @@ const TikTokItemManager = () => {
             <Gift className="w-4 h-4" />
             アイテム追加
           </button>
-          // 削除ボタンのコードを以下のように修正
-<button 
-  onClick={() => {
-    if (selectedItems.length > 0) {
-      // 確認ダイアログを表示する前に状態をチェック
-      const itemsToDelete = selectedItems.length;
-      if (window.confirm(`選択した${itemsToDelete}個のアイテムを削除しますか？`)) {
-        try {
-          // バッチ処理として一括で削除
-          const updates = {};
-          selectedItems.forEach(id => {
-            updates[`items/${id}`] = null;
-          });
-          update(ref(db), updates);
-          setSelectedItems([]);
-        } catch (error) {
-          console.error('Error deleting items:', error);
-        }
-      }
-    }
-  }}
-  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
->
-  <Trash2 className="w-4 h-4" />
-  アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
-</button>
+          <button 
+            onClick={() => {
+              if (selectedItems.length > 0) {
+                if (window.confirm('選択したアイテムを削除しますか？')) {
+                  setItems(prevItems => prevItems.filter(item => !selectedItems.includes(item.id)));
+                  setSelectedItems([]);
+                }
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            <Trash2 className="w-4 h-4" />
+            アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
+          </button>
         </div>
       </div>
 
