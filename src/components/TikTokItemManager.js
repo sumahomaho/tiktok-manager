@@ -220,35 +220,14 @@ const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
 };
 // メインのTikTokItemManagerコンポーネント
 const TikTokItemManager = () => {
-  const [items, setItems] = useState(() => {
-    try {
-      const savedItems = localStorage.getItem('tiktokItems');
-      return savedItems ? JSON.parse(savedItems) : [];
-    } catch (error) {
-      console.error('Error loading items:', error);
-      return [];
-    }
-  });
+  const [items, setItems] = useState([]);
+ 
 
   const [selectedItems, setSelectedItems] = useState([]);
   const [isItemAddModalOpen, setIsItemAddModalOpen] = useState(false);
   const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
 
-  const [contributors, setContributors] = useState(() => {
-    try {
-      const savedContributors = localStorage.getItem('tiktokContributors');
-      return savedContributors ? JSON.parse(savedContributors) : [
-        'ユーザー1',
-        'ユーザー2',
-        'ユーザー3',
-        'ユーザー4',
-        'ユーザー5'
-      ];
-    } catch (error) {
-      console.error('Error loading contributors:', error);
-      return ['ユーザー1', 'ユーザー2', 'ユーザー3', 'ユーザー4', 'ユーザー5'];
-    }
-  });
+  const [contributors, setContributors] = useState([]);
 
   useEffect(() => {
     try {
