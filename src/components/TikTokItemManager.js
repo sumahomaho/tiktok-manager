@@ -50,7 +50,7 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style={{ zIndex: 1000 }}>
       <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">ユーザー管理</h2>
@@ -152,7 +152,7 @@ const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style={{ zIndex: 1000 }}>
       <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">アイテム追加</h2>
