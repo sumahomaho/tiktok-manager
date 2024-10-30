@@ -432,8 +432,12 @@ const TikTokItemManager = () => {
               <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
               <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
               <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
-              <th className="px-4 py-2 text-center border-b whitespace-nowrap">使用期限</th>
-              <th className="px-4 py-2 text-center border-b whitespace-nowrap">取得日時</th>
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">
+  <div className="flex flex-col gap-1">
+    <div>取得日時</div>
+    <div className="text-gray-600">使用期限</div>
+  </div>
+</th>
             </tr>
           </thead>
           <tbody>
@@ -486,22 +490,21 @@ const TikTokItemManager = () => {
     <div className="whitespace-nowrap">{getRemainingTime(item.expiryTime).time}</div>
   </div>
 </td>    
-                <td className="px-4 py-2 border-b">
-                  <div className="flex flex-col items-center text-center min-w-[120px]">
-                    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).date}</div>
-                    <div className="whitespace-nowrap">{formatDateTime(item.expiryTime).time}</div>
-                  </div>
-                </td>
-                <td className="px-4 py-2 border-b">
-              <input
-  type="datetime-local"
-  value={formatInputDateTime(item.acquisitionTime)}
-  onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-  className="w-full p-1 border rounded text-sm"
-  style={{ maxWidth: '150px' }}
-  step="60"
-/>    
-                </td>
+<td className="px-4 py-2 border-b">
+  <div className="flex flex-col gap-1">
+    <input
+      type="datetime-local"
+      value={formatInputDateTime(item.acquisitionTime)}
+      onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+      className="w-full p-1 border rounded text-sm"
+      style={{ maxWidth: '150px' }}
+      step="60"
+    />
+    <div className="text-sm text-gray-600 text-center whitespace-nowrap">
+      {formatDateTime(item.expiryTime).date} {formatDateTime(item.expiryTime).time}
+    </div>
+  </div>
+</td>                
               </tr>
             ))}
           </tbody>
