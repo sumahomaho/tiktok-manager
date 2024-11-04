@@ -80,7 +80,12 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
         </div>
 
         <ul className="space-y-2">
-          {contributors.map(contributor => (
+          {contributors.map(contributor => ({
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
             <li key={contributor} className="flex items-center gap-2 p-2 border rounded">
               {editingId === contributor ? (
                 <>
@@ -221,12 +226,9 @@ const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
 // メインのTikTokItemManagerコンポーネント
 const TikTokItemManager = () => {
   const [items, setItems] = useState([]);
- 
-
   const [selectedItems, setSelectedItems] = useState([]);
   const [isItemAddModalOpen, setIsItemAddModalOpen] = useState(false);
   const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
-
   const [contributors, setContributors] = useState([]);
 
   useEffect(() => {
@@ -278,18 +280,20 @@ const TikTokItemManager = () => {
     }
   };
 
-  const addItem = (newItemData) => {
+  const addItem = async (newItemData) => {
     try {
       const itemsRef = ref(db, 'items');
-      push(itemsRef, {
+      const result = await push(itemsRef, {
         contributor: newItemData.contributor,
         item: newItemData.item,
         acquisitionTime: newItemData.acquisitionTime,
         expiryTime: new Date(new Date(newItemData.acquisitionTime).getTime() + 120 * 60 * 60 * 1000).toISOString(),
         timestamp: new Date().toISOString()
       });
+      console.log('Item added successfully:', result);
     } catch (error) {
       console.error('Error adding item:', error);
+      alert('アイテムの追加に失敗しました: ' + error.message);
     }
   };
 
