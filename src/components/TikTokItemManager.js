@@ -80,12 +80,7 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
         </div>
 
         <ul className="space-y-2">
-          {contributors.map(contributor => ({
-  "rules": {
-    ".read": true,
-    ".write": true
-  }
-}
+          {contributors.map(contributor => (
             <li key={contributor} className="flex items-center gap-2 p-2 border rounded">
               {editingId === contributor ? (
                 <>
