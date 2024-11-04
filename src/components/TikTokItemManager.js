@@ -136,17 +136,33 @@ const ItemAddModal = ({ isOpen, onClose, contributors, addItem }) => {
     // 日本時間のISO文字列を作成
     const jstTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
 
+    // contributorsが空の場合のデフォルト値を設定
     return {
-      contributor: contributors[0],
+      contributor: contributors && contributors.length > 0 ? contributors[0] : 'ユーザー1',
       item: ITEMS[0],
       acquisitionTime: jstTimeString
     };
   });
 
-  if (!isOpen) return null;  // この行を追加
+  // useEffectを追加してcontributorsの変更を監視
+  useEffect(() => {
+    if (contributors && contributors.length > 0 && !contributors.includes(newItem.contributor)) {
+      setNewItem(prev => ({
+        ...prev,
+        contributor: contributors[0]
+      }));
+    }
+  }, [contributors]);
 
-  // この handleAdd 関数を追加
+  if (!isOpen) return null;
+
+  // handleAddの修正
   const handleAdd = () => {
+    // 値の存在確認を追加
+    if (!newItem.contributor || !newItem.item || !newItem.acquisitionTime) {
+      alert('必要な情報が不足しています');
+      return;
+    }
     addItem(newItem);
     onClose();
   };
@@ -277,6 +293,11 @@ const TikTokItemManager = () => {
 
   const addItem = async (newItemData) => {
     try {
+      // データの存在確認を追加
+      if (!newItemData.contributor || !newItemData.item || !newItemData.acquisitionTime) {
+        throw new Error('必要な情報が不足しています');
+      }
+  
       const itemsRef = ref(db, 'items');
       const result = await push(itemsRef, {
         contributor: newItemData.contributor,
