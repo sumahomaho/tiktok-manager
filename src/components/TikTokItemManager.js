@@ -419,161 +419,161 @@ const TikTokItemManager = () => {
   };
   return (
     <div className="p-4 space-y-4">
-    <h1 className="text-2xl font-bold">TikTokアイテム管理</h1>
-  
-    {/* ボタンの配置をテーブルの前面（上）に移動 */}
-    <div className="flex gap-2">
-      <button 
-        onClick={() => setIsContributorModalOpen(true)} 
-        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 shadow-md transition duration-200"
-      >
-        <Users className="w-4 h-4" />
-        ユーザー管理
-      </button>
-      <button 
-        onClick={() => setIsItemAddModalOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 shadow-md transition duration-200"
-      >
-        <Gift className="w-4 h-4" />
-        アイテム追加
-      </button>
-      <button 
-        onClick={() => {
-          if (selectedItems.length > 0) {
-            if (window.confirm('選択したアイテムを削除しますか？')) {
-              try {
-                const updates = {};
-                selectedItems.forEach(id => {
-                  updates[`items/${id}`] = null;
-                });
-                update(ref(db), updates);
-                setSelectedItems([]);
-              } catch (error) {
-                console.error('Error deleting items:', error);
-              }
-            }
-          }
-        }}
-        className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 shadow-md transition duration-200"
-      >
-        <Trash2 className="w-4 h-4" />
-        アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
-      </button>
-    </div>
-  
-    {/* テーブル */}
-    <div className="overflow-x-scroll lg:overflow-x-auto mt-4">
-      <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg">
-        <thead className="bg-gray-100 text-gray-800">
-          <tr>
-            <th className="px-4 py-2 text-center border-b whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={items.length > 0 && selectedItems.length === items.length}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedItems(items.map(item => item.id));
-                  } else {
-                    setSelectedItems([]);
-                  }
-                }}
-                className="w-4 h-4"
-              />
-            </th>
-            <th className="px-4 py-2 text-left border-b">ユーザー</th>
-            <th className="px-4 py-2 text-left border-b">アイテム</th>
-            <th className="px-4 py-2 text-left border-b">残り時間</th>
-            <th className="px-4 py-2 text-center border-b">
-              <div className="flex flex-col gap-1">
-                <div>取得日時</div>
-                <div className="text-gray-600">使用期限</div>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, index) => (
-            <tr key={item.id} className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100`}>
-              <td className="px-4 py-2 border-b text-center">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">TikTokアイテム管理</h1>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setIsContributorModalOpen(true)} 
+            className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            <Users className="w-4 h-4" />
+            ユーザー管理
+          </button>
+          <button 
+            onClick={() => setIsItemAddModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            <Gift className="w-4 h-4" />
+            アイテム追加
+          </button>
+          <button 
+  onClick={() => {
+    if (selectedItems.length > 0) {
+      if (window.confirm('選択したアイテムを削除しますか？')) {
+        try {
+          // Firebase上でのアイテム削除
+          const updates = {};
+          selectedItems.forEach(id => {
+            updates[`items/${id}`] = null;
+          });
+          update(ref(db), updates);
+          setSelectedItems([]);
+        } catch (error) {
+          console.error('Error deleting items:', error);
+        }
+      }
+    }
+  }}
+  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+>
+  <Trash2 className="w-4 h-4" />
+  アイテム削除 {selectedItems.length > 0 && `(${selectedItems.length})`}
+</button>
+        </div>
+      </div>
+
+      <div className="overflow-x-scroll lg:overflow-x-auto">
+  <table className="min-w-full bg-white border border-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">
                 <input
                   type="checkbox"
-                  checked={selectedItems.includes(item.id)}
+                  checked={items.length > 0 && selectedItems.length === items.length}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedItems([...selectedItems, item.id]);
+                      setSelectedItems(items.map(item => item.id));
                     } else {
-                      setSelectedItems(selectedItems.filter(id => id !== item.id));
+                      setSelectedItems([]);
                     }
                   }}
                   className="w-4 h-4"
                 />
-              </td>
-              <td className="px-4 py-2 border-b text-left">
-                <select
-                  value={item.contributor}
-                  onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
-                  className="w-full p-1 border rounded text-sm truncate"
-                  style={{ maxWidth: '120px' }}
-                >
-                  {contributors.map(contributor => (
-                    <option key={contributor} value={contributor}>
-                      {contributor.length > 10 ? `${contributor.slice(0, 10)}...` : contributor}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td className="px-4 py-2 border-b text-left">
-                <select
-                  value={item.item}
-                  onChange={(e) => updateItem(item.id, 'item', e.target.value)}
-                  className="w-20 p-2 border rounded"
-                >
-                  {ITEMS.map(itemOption => (
-                    <option key={itemOption} value={itemOption}>
-                      {itemOption}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td className="px-4 py-2 border-b" style={{ minWidth: '110px', whiteSpace: 'nowrap' }}>
-                <div className="flex items-center gap-1">
-                  {getRemainingTime(item.expiryTime)}
-                </div>
-              </td>
-              <td className="px-4 py-2 border-b">
-                <div className="flex flex-col gap-1">
-                  <input
-                    type="datetime-local"
-                    value={formatInputDateTime(item.acquisitionTime)}
-                    onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
-                    className="w-full p-1 border rounded text-sm"
-                    style={{ maxWidth: '150px' }}
-                    step="60"
-                  />
-                  <div className="text-sm text-gray-600 text-center whitespace-nowrap">
-                    {formatDateTime(item.expiryTime).date} {formatDateTime(item.expiryTime).time}
-                  </div>
-                </div>
-              </td>
+              </th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">ユーザー</th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">アイテム</th>
+              <th className="px-4 py-2 text-left border-b whitespace-nowrap">残り時間</th>
+              <th className="px-4 py-2 text-center border-b whitespace-nowrap">
+  <div className="flex flex-col gap-1">
+    <div>取得日時</div>
+    <div className="text-gray-600">使用期限</div>
+  </div>
+</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.map(item => (
+              <tr key={item.id} className="hover:bg-gray-50">
+                <td className="px-4 py-2 border-b text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(item.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedItems([...selectedItems, item.id]);
+                      } else {
+                        setSelectedItems(selectedItems.filter(id => id !== item.id));
+                      }
+                    }}
+                    className="w-4 h-4"
+                  />
+                </td>
+                <td className="px-4 py-2 border-b">
+                <select
+  value={item.contributor}
+  onChange={(e) => updateItem(item.id, 'contributor', e.target.value)}
+  className="w-full p-1 border rounded text-sm truncate"
+  style={{ maxWidth: '120px' }}
+>
+  {contributors.map(contributor => (
+    <option key={contributor} value={contributor}>
+      {contributor.length > 10 ? `${contributor.slice(0, 10)}...` : contributor}
+    </option>
+  ))}
+</select> 
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <select
+                    value={item.item}
+                    onChange={(e) => updateItem(item.id, 'item', e.target.value)}
+                    className="w-20 p-2 border rounded"
+                  >
+                    {ITEMS.map(itemOption => (
+                      <option key={itemOption} value={itemOption}>
+                        {itemOption}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-4 py-2 border-b" style={{ minWidth: '110px', whiteSpace: 'nowrap' }}>
+  <div className="flex items-center gap-1">
+    {getRemainingTime(item.expiryTime)}
+  </div>
+</td>
+<td className="px-4 py-2 border-b">
+  <div className="flex flex-col gap-1">
+    <input
+      type="datetime-local"
+      value={formatInputDateTime(item.acquisitionTime)}
+      onChange={(e) => updateItem(item.id, 'acquisitionTime', e.target.value)}
+      className="w-full p-1 border rounded text-sm"
+      style={{ maxWidth: '150px' }}
+      step="60"
+    />
+    <div className="text-sm text-gray-600 text-center whitespace-nowrap">
+      {formatDateTime(item.expiryTime).date} {formatDateTime(item.expiryTime).time}
     </div>
-  
-    <ContributorModal
-      isOpen={isContributorModalOpen}
-      onClose={() => setIsContributorModalOpen(false)}
-      contributors={contributors}
-      setContributors={setContributors}
-    />
-    <ItemAddModal
-      isOpen={isItemAddModalOpen}
-      onClose={() => setIsItemAddModalOpen(false)}
-      contributors={contributors}
-      addItem={addItem}
-    />
-  </div>   
+  </div>
+</td>                
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <ContributorModal
+        isOpen={isContributorModalOpen}
+        onClose={() => setIsContributorModalOpen(false)}
+        contributors={contributors}
+        setContributors={setContributors}
+      />
+      <ItemAddModal
+        isOpen={isItemAddModalOpen}
+        onClose={() => setIsItemAddModalOpen(false)}
+        contributors={contributors}
+        addItem={addItem}
+      />
+    </div>
   );
 };
 
