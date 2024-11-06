@@ -42,12 +42,27 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
 
   const handleEdit = () => {
     if (editingName.trim() && !contributors.includes(editingName.trim())) {
-      setContributors(contributors.map(c => 
+      // データベースのcontributorsリファレンスを取得
+      const contributorRef = ref(db, 'contributors');
+      
+      // 編集内容をデータベースに更新
+      const updatedContributors = contributors.map(c => 
         c === editingId ? editingName.trim() : c
-      ));
+      );
+      
+      // Firebaseに反映
+      set(contributorRef, updatedContributors)
+        .then(() => {
+          setContributors(updatedContributors); // ローカル状態を更新
+          setEditingId(null);
+        })
+        .catch(error => {
+          console.error("Error updating contributor:", error);
+          alert("ユーザー名の更新に失敗しました");
+        });
     }
-    setEditingId(null);
   };
+  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
