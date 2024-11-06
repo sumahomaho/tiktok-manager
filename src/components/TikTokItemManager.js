@@ -40,28 +40,45 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
     setEditingName(contributor);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (editingName.trim() && !contributors.includes(editingName.trim())) {
-      // データベースのcontributorsリファレンスを取得
+      // contributorsのリファレンスとitemsのリファレンスを取得
       const contributorRef = ref(db, 'contributors');
+      const itemsRef = ref(db, 'items');
       
-      // 編集内容をデータベースに更新
+      // 更新されたユーザー名のリスト
       const updatedContributors = contributors.map(c => 
         c === editingId ? editingName.trim() : c
       );
-      
-      // Firebaseに反映
-      set(contributorRef, updatedContributors)
-        .then(() => {
-          setContributors(updatedContributors); // ローカル状態を更新
-          setEditingId(null);
-        })
-        .catch(error => {
-          console.error("Error updating contributor:", error);
-          alert("ユーザー名の更新に失敗しました");
+  
+      try {
+        // Firebaseにcontributorsを更新
+        await set(contributorRef, updatedContributors);
+  
+        // itemsからユーザー名を持つすべてのアイテムを取得し、更新
+        const snapshot = await onValue(itemsRef, (snapshot) => {
+          const itemsData = snapshot.val();
+          if (itemsData) {
+            Object.entries(itemsData).forEach(([key, item]) => {
+              if (item.contributor === editingId) {
+                // アイテムのcontributorフィールドを新しい名前で更新
+                update(ref(db, `items/${key}`), { contributor: editingName.trim() });
+              }
+            });
+          }
         });
+  
+        // 状態を更新
+        setContributors(updatedContributors);
+        setEditingId(null);
+        setEditingName('');
+        
+      } catch (error) {
+        console.error("Error updating contributor and items:", error);
+        alert("ユーザー名の更新に失敗しました");
+      }
     }
-  };
+  };  
   
 
   return (
