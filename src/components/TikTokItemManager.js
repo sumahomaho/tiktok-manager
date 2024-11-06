@@ -52,19 +52,21 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
       );
   
       try {
-        // Firebaseにcontributorsを更新
+        // contributorsをFirebaseに更新
         await set(contributorRef, updatedContributors);
   
-        // itemsからユーザー名を持つすべてのアイテムを取得し、更新
-        const snapshot = await onValue(itemsRef, (snapshot) => {
+        // itemsのcontributorフィールドを更新する
+        const itemsSnapshot = await onValue(itemsRef, (snapshot) => {
           const itemsData = snapshot.val();
           if (itemsData) {
+            const updates = {};
             Object.entries(itemsData).forEach(([key, item]) => {
               if (item.contributor === editingId) {
-                // アイテムのcontributorフィールドを新しい名前で更新
-                update(ref(db, `items/${key}`), { contributor: editingName.trim() });
+                updates[`items/${key}/contributor`] = editingName.trim();
               }
             });
+            // すべての対象アイテムの更新をまとめて実行
+            update(ref(db), updates);
           }
         });
   
@@ -78,7 +80,7 @@ const ContributorModal = ({ isOpen, onClose, contributors, setContributors }) =>
         alert("ユーザー名の更新に失敗しました");
       }
     }
-  };  
+  };    
   
 
   return (
