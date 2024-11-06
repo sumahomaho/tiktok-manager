@@ -501,11 +501,11 @@ const TikTokItemManager = () => {
                     ))}
                   </select>
                 </td>
-                <td className="px-4 py-2 border-b">
-  <div className="flex items-center gap-1 whitespace-nowrap">
+                <td className="px-4 py-2 border-b" style={{ minWidth: '120px', whiteSpace: 'nowrap' }}>
+  <div className="flex items-center gap-1">
     {getRemainingTime(item.expiryTime)}
   </div>
-</td> 
+</td>
 <td className="px-4 py-2 border-b">
   <div className="flex flex-col gap-1">
     <input
